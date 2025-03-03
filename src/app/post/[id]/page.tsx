@@ -1,0 +1,353 @@
+"use client";
+
+import type React from "react";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Heart,
+  MessageCircle,
+  Share2,
+  BookmarkPlus,
+  MoreVertical,
+  Send,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatTimeAgo } from "@/lib/utils";
+
+// Mock data for a single post
+const post = {
+  id: 1,
+  type: "help",
+  title: "Need help with bathroom renovation",
+  content:
+    "I'm trying to renovate my bathroom but having issues with the tile layout. The main problem is with the corner junction where the wall meets the floor. I've tried different approaches but none seem to give a clean finish. Looking for expert advice on the best way to handle this.\n\nSpecific questions:\n1. What's the best way to handle corner transitions?\n2. Should I use caulk or grout for the corners?\n3. Any specific tools I should be using?",
+  category: "Plumbing",
+  images: [
+    "/placeholder.svg?height=400&width=600",
+    "/placeholder.svg?height=400&width=600",
+    "/placeholder.svg?height=400&width=600",
+  ],
+  author: {
+    name: "John Doe",
+    avatar: "/placeholder.svg?height=40&width=40",
+    expertise: "DIY Enthusiast",
+  },
+  timestamp: "2024-03-02T10:00:00Z",
+  likes: 24,
+  comments: 8,
+  urgency: "High",
+};
+
+// Mock data for comments
+const mockComments = [
+  {
+    id: 1,
+    content:
+      "For corner transitions, I'd recommend using a corner trim piece. It gives a much cleaner look and helps prevent cracking over time.",
+    author: {
+      name: "Mike Wilson",
+      avatar: "/placeholder.svg?height=40&width=40",
+      expertise: "Professional Tiler",
+    },
+    timestamp: "2024-03-02T11:30:00Z",
+    likes: 12,
+    replies: [
+      {
+        id: 11,
+        content:
+          "Agreed! Also make sure to use silicone caulk in the corners, not grout. Grout will crack over time due to house movement.",
+        author: {
+          name: "Sarah Johnson",
+          avatar: "/placeholder.svg?height=40&width=40",
+          expertise: "Contractor",
+        },
+        timestamp: "2024-03-02T12:15:00Z",
+        likes: 8,
+      },
+    ],
+  },
+  {
+    id: 2,
+    content:
+      "Here's a tip: Use a laser level to ensure your tiles are perfectly straight. It makes a huge difference in the final look.",
+    author: {
+      name: "Emily Chen",
+      avatar: "/placeholder.svg?height=40&width=40",
+      expertise: "DIY Expert",
+    },
+    timestamp: "2024-03-02T13:00:00Z",
+    likes: 6,
+    replies: [],
+  },
+];
+
+export default function PostDetail() {
+  const router = useRouter();
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState(mockComments);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    setIsSubmitting(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const newCommentObj = {
+      id: comments.length + 1,
+      content: newComment,
+      author: {
+        name: "Current User",
+        avatar: "/placeholder.svg?height=40&width=40",
+        expertise: "Member",
+      },
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      replies: [],
+    };
+
+    setComments((prev) => [newCommentObj, ...prev]);
+    setNewComment("");
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="min-h-screen pb-16">
+      {/* Header */}
+      <div className="sticky top-0 z-20 border-b bg-background">
+        <div className="flex items-center justify-between p-4">
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon">
+              <Share2 className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <BookmarkPlus className="h-5 w-5" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Report Post</DropdownMenuItem>
+                <DropdownMenuItem>Copy Link</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+
+      {/* Post Content */}
+      <div className="space-y-4 p-4">
+        <div className="flex items-start gap-3">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={post.author.avatar} alt={post.author.name} />
+            <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="font-semibold">{post.author.name}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {post.author.expertise}
+                </p>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                {formatTimeAgo(new Date(post.timestamp))}
+              </span>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Badge variant={post.type === "help" ? "destructive" : "default"}>
+                {post.type === "help" ? "Help Needed" : "Showcase"}
+              </Badge>
+              <Badge variant="outline">{post.category}</Badge>
+              {post.urgency && (
+                <Badge variant="secondary">Urgency: {post.urgency}</Badge>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h1 className="mb-2 text-xl font-bold">{post.title}</h1>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {post.content}
+          </p>
+        </div>
+
+        {/* Image Gallery */}
+        {post.images && post.images.length > 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            {post.images.map((image, index) => (
+              <div
+                key={index}
+                className={`relative cursor-pointer ${index === 0 && post.images.length === 3 ? "col-span-2" : ""}`}
+                onClick={() => {
+                  setSelectedImageIndex(index);
+                  setImageViewerOpen(true);
+                }}
+              >
+                <img
+                  src={image || "/placeholder.svg"}
+                  alt={`Post image ${index + 1}`}
+                  className="h-48 w-full rounded-lg object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Engagement Stats */}
+        <div className="flex items-center justify-between border-y py-2">
+          <Button variant="ghost" size="sm">
+            <Heart className="mr-2 h-4 w-4" />
+            {post.likes} Likes
+          </Button>
+          <Button variant="ghost" size="sm">
+            <MessageCircle className="mr-2 h-4 w-4" />
+            {comments.length} Comments
+          </Button>
+        </div>
+
+        {/* Comment Input */}
+        <form onSubmit={handleSubmitComment} className="flex gap-2">
+          <Textarea
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            className="min-h-[44px] resize-none"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={!newComment.trim() || isSubmitting}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </form>
+
+        {/* Comments Section */}
+        <div className="space-y-4">
+          {comments.map((comment) => (
+            <div key={comment.id} className="space-y-4">
+              <div className="flex gap-3">
+                <Avatar>
+                  <AvatarImage
+                    src={comment.author.avatar}
+                    alt={comment.author.name}
+                  />
+                  <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="font-semibold">
+                        {comment.author.name}
+                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {comment.author.expertise}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatTimeAgo(new Date(comment.timestamp))}
+                    </span>
+                  </div>
+                  <p className="text-sm">{comment.content}</p>
+                  <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="sm">
+                      <Heart className="mr-1 h-3 w-3" />
+                      {comment.likes}
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      Reply
+                    </Button>
+                  </div>
+
+                  {/* Replies */}
+                  {comment.replies.length > 0 && (
+                    <div className="mt-4 space-y-4 border-l pl-4">
+                      {comment.replies.map((reply) => (
+                        <div key={reply.id} className="flex gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage
+                              src={reply.author.avatar}
+                              alt={reply.author.name}
+                            />
+                            <AvatarFallback>
+                              {reply.author.name[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <span className="font-semibold">
+                                  {reply.author.name}
+                                </span>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                  {reply.author.expertise}
+                                </span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {formatTimeAgo(new Date(reply.timestamp))}
+                              </span>
+                            </div>
+                            <p className="text-sm">{reply.content}</p>
+                            <div className="flex items-center gap-4">
+                              <Button variant="ghost" size="sm">
+                                <Heart className="mr-1 h-3 w-3" />
+                                {reply.likes}
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                Reply
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Image Viewer Dialog */}
+      <Dialog open={imageViewerOpen} onOpenChange={setImageViewerOpen}>
+        <DialogContent className="h-[90vh] max-w-full p-0">
+          <ScrollArea className="h-full">
+            <div className="relative h-full w-full">
+              <img
+                src={post.images?.[selectedImageIndex] || "/placeholder.svg"}
+                alt={`Post image ${selectedImageIndex + 1}`}
+                className="h-auto w-full"
+              />
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
