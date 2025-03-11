@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useExperts, SPECIALTIES } from "@/lib/experts-context";
 import { Search, Filter, Star, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,118 +19,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// Mock data for experts
-const experts = [
-  {
-    id: 1,
-    name: "Alex Johnson",
-    specialty: "Plumbing",
-    rating: 4.8,
-    reviews: 127,
-    distance: "2.3 miles",
-    availability: "Available today",
-    skills: ["Pipe Repair", "Fixture Installation", "Water Heaters"],
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 2,
-    name: "Sam Rodriguez",
-    specialty: "Electrical",
-    rating: 4.9,
-    reviews: 94,
-    distance: "3.7 miles",
-    availability: "Available tomorrow",
-    skills: ["Wiring", "Lighting", "Panel Upgrades"],
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 3,
-    name: "Jamie Smith",
-    specialty: "Carpentry",
-    rating: 4.7,
-    reviews: 56,
-    distance: "1.5 miles",
-    availability: "Available today",
-    skills: ["Furniture Assembly", "Cabinets", "Flooring"],
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 4,
-    name: "Taylor Wilson",
-    specialty: "Painting",
-    rating: 4.6,
-    reviews: 42,
-    distance: "4.2 miles",
-    availability: "Available in 2 days",
-    skills: ["Interior", "Exterior", "Staining"],
-    image: "/placeholder.svg?height=80&width=80",
-  },
-  {
-    id: 5,
-    name: "Morgan Lee",
-    specialty: "General Handyman",
-    rating: 4.9,
-    reviews: 138,
-    distance: "0.8 miles",
-    availability: "Available today",
-    skills: ["Repairs", "Installation", "Maintenance"],
-    image: "/placeholder.svg?height=80&width=80",
-  },
-];
-
-// Specialty options
-const specialties = [
-  "All",
-  "Plumbing",
-  "Electrical",
-  "Carpentry",
-  "Painting",
-  "General Handyman",
-  "HVAC",
-  "Roofing",
-  "Landscaping",
-];
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ExpertPage() {
+  const { 
+    experts,
+    filteredExperts,
+    setSearchQuery,
+    setSelectedSpecialty,
+    selectedExpert,
+    startExpertChat
+  } = useExperts();
+  
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSpecialty, setSelectedSpecialty] = useState("All");
-  const [maxDistance, setMaxDistance] = useState(10);
+  const [selectedSpecialtyLocal, setSelectedSpecialtyLocal] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Filter experts based on search and filters
-  const filteredExperts = experts.filter((expert) => {
-    const matchesSearch =
-      expert.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expert.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      expert.skills.some((skill) =>
-        skill.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setSearchQuery(value);
+  };
 
-    const matchesSpecialty =
-      selectedSpecialty === "All" || expert.specialty === selectedSpecialty;
+  // Handle specialty selection
+  const handleSpecialtyChange = (value: string) => {
+    setSelectedSpecialtyLocal(value);
+    setSelectedSpecialty(value === "Alle" ? null : value);
+  };
 
-    // Parse distance (removing "miles" and converting to number)
-    const expertDistance = Number.parseFloat(expert.distance.split(" ")[0]);
-    const matchesDistance = expertDistance <= maxDistance;
+  // Reset filters
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedSpecialtyLocal(null);
+    setSearchQuery("");
+    setSelectedSpecialty(null);
+  };
 
-    return matchesSearch && matchesSpecialty && matchesDistance;
-  });
+  // Contact expert and navigate to chat
+  const handleContactExpert = (expert: typeof experts[0]) => {
+    // First create or activate the expert chat thread
+    startExpertChat(expert);
+    
+    // Set a small timeout to ensure the thread is created and active before navigating
+    setTimeout(() => {
+      router.push("/chat");
+    }, 50);
+  };
 
   return (
     <div className="space-y-4 p-4">
-      <h1 className="text-2xl font-bold">Find an Expert</h1>
+      <h1 className="text-2xl font-bold">Experten finden</h1>
 
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
           <Input
-            placeholder="Search for experts, skills..."
+            placeholder="Suche nach Experten, Fähigkeiten..."
             className="pl-9"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
           />
         </div>
 
@@ -143,21 +94,22 @@ export default function ExpertPage() {
           </SheetTrigger>
           <SheetContent side="right">
             <SheetHeader>
-              <SheetTitle>Filter Experts</SheetTitle>
+              <SheetTitle>Experten filtern</SheetTitle>
             </SheetHeader>
 
             <div className="space-y-6 py-6">
               <div className="space-y-2">
-                <Label htmlFor="specialty">Specialty</Label>
+                <Label htmlFor="specialty">Fachgebiet</Label>
                 <Select
-                  value={selectedSpecialty}
-                  onValueChange={setSelectedSpecialty}
+                  value={selectedSpecialtyLocal ?? ""}
+                  onValueChange={handleSpecialtyChange}
                 >
                   <SelectTrigger id="specialty">
-                    <SelectValue placeholder="Select specialty" />
+                    <SelectValue placeholder="Fachgebiet auswählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    {specialties.map((specialty) => (
+                    <SelectItem value="Alle">Alle</SelectItem>
+                    {SPECIALTIES.map((specialty: string) => (
                       <SelectItem key={specialty} value={specialty}>
                         {specialty}
                       </SelectItem>
@@ -167,42 +119,25 @@ export default function ExpertPage() {
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="distance">Maximum Distance</Label>
-                  <span className="text-muted-foreground text-sm">
-                    {maxDistance} miles
-                  </span>
-                </div>
-                <Slider
-                  id="distance"
-                  min={1}
-                  max={20}
-                  step={1}
-                  value={[maxDistance]}
-                  onValueChange={(value) => setMaxDistance(value[0])}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Availability</Label>
+                <Label>Verfügbarkeit</Label>
                 <div className="flex flex-wrap gap-2">
                   <Badge
                     variant="outline"
                     className="hover:bg-primary hover:text-primary-foreground cursor-pointer"
                   >
-                    Today
+                    Heute
                   </Badge>
                   <Badge
                     variant="outline"
                     className="hover:bg-primary hover:text-primary-foreground cursor-pointer"
                   >
-                    Tomorrow
+                    Morgen
                   </Badge>
                   <Badge
                     variant="outline"
                     className="hover:bg-primary hover:text-primary-foreground cursor-pointer"
                   >
-                    This Week
+                    Diese Woche
                   </Badge>
                 </div>
               </div>
@@ -212,27 +147,31 @@ export default function ExpertPage() {
               <Button
                 variant="outline"
                 className="flex-1"
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedSpecialty("All");
-                  setMaxDistance(10);
-                }}
+                onClick={resetFilters}
               >
-                Reset
+                Zurücksetzen
               </Button>
-              <Button className="flex-1">Apply Filters</Button>
+              <Button className="flex-1">Filter anwenden</Button>
             </div>
           </SheetContent>
         </Sheet>
       </div>
 
       <div className="no-scrollbar flex gap-2 overflow-x-auto py-2">
-        {specialties.map((specialty) => (
+        <Badge
+          key="all"
+          variant={!selectedSpecialtyLocal ? "default" : "outline"}
+          className="cursor-pointer whitespace-nowrap"
+          onClick={() => handleSpecialtyChange("Alle")}
+        >
+          Alle
+        </Badge>
+        {SPECIALTIES.map((specialty: string) => (
           <Badge
             key={specialty}
-            variant={selectedSpecialty === specialty ? "default" : "outline"}
+            variant={selectedSpecialtyLocal === specialty ? "default" : "outline"}
             className="cursor-pointer whitespace-nowrap"
-            onClick={() => setSelectedSpecialty(specialty)}
+            onClick={() => handleSpecialtyChange(specialty)}
           >
             {specialty}
           </Badge>
@@ -245,7 +184,7 @@ export default function ExpertPage() {
             <div key={expert.id} className="space-y-3 rounded-lg border p-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={expert.image} alt={expert.name} />
+                  <AvatarImage src={expert.profileImage} alt={expert.name} />
                   <AvatarFallback>{expert.name.charAt(0)}</AvatarFallback>
                 </Avatar>
 
@@ -260,15 +199,15 @@ export default function ExpertPage() {
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   <span className="font-medium">{expert.rating}</span>
                   <span className="text-muted-foreground text-sm">
-                    ({expert.reviews})
+                    ({expert.ratingCount})
                   </span>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-1">
-                {expert.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="text-xs">
-                    {skill}
+                {expert.categories.map((category) => (
+                  <Badge key={category} variant="secondary" className="text-xs">
+                    {category}
                   </Badge>
                 ))}
               </div>
@@ -276,7 +215,7 @@ export default function ExpertPage() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
                   <MapPin className="text-muted-foreground h-3.5 w-3.5" />
-                  <span>{expert.distance}</span>
+                  <span>{expert.hourlyRate}€/h</span>
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -285,16 +224,21 @@ export default function ExpertPage() {
                 </div>
               </div>
 
-              <Button className="w-full">Contact Expert</Button>
+              <Button 
+                className="w-full"
+                onClick={() => handleContactExpert(expert)}
+              >
+                Experten kontaktieren
+              </Button>
             </div>
           ))
         ) : (
           <div className="py-8 text-center">
             <p className="text-muted-foreground">
-              No experts found matching your criteria.
+              Keine Experten gefunden, die Ihren Kriterien entsprechen.
             </p>
             <p className="text-sm">
-              Try adjusting your filters or search term.
+              Versuchen Sie, Ihre Filter oder Suchbegriffe anzupassen.
             </p>
           </div>
         )}

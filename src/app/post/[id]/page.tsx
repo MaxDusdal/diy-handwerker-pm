@@ -2,8 +2,8 @@
 
 import type React from "react";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Heart,
@@ -26,107 +26,81 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatTimeAgo } from "@/lib/utils";
-
-// Mock data for a single post
-const post = {
-  id: 1,
-  type: "help",
-  title: "Need help with bathroom renovation",
-  content:
-    "I'm trying to renovate my bathroom but having issues with the tile layout. The main problem is with the corner junction where the wall meets the floor. I've tried different approaches but none seem to give a clean finish. Looking for expert advice on the best way to handle this.\n\nSpecific questions:\n1. What's the best way to handle corner transitions?\n2. Should I use caulk or grout for the corners?\n3. Any specific tools I should be using?",
-  category: "Plumbing",
-  images: [
-    "/placeholder.svg?height=400&width=600",
-    "/placeholder.svg?height=400&width=600",
-    "/placeholder.svg?height=400&width=600",
-  ],
-  author: {
-    name: "John Doe",
-    avatar: "/placeholder.svg?height=40&width=40",
-    expertise: "DIY Enthusiast",
-  },
-  timestamp: "2024-03-02T10:00:00Z",
-  likes: 24,
-  comments: 8,
-  urgency: "High",
-};
-
-// Mock data for comments
-const mockComments = [
-  {
-    id: 1,
-    content:
-      "For corner transitions, I'd recommend using a corner trim piece. It gives a much cleaner look and helps prevent cracking over time.",
-    author: {
-      name: "Mike Wilson",
-      avatar: "/placeholder.svg?height=40&width=40",
-      expertise: "Professional Tiler",
-    },
-    timestamp: "2024-03-02T11:30:00Z",
-    likes: 12,
-    replies: [
-      {
-        id: 11,
-        content:
-          "Agreed! Also make sure to use silicone caulk in the corners, not grout. Grout will crack over time due to house movement.",
-        author: {
-          name: "Sarah Johnson",
-          avatar: "/placeholder.svg?height=40&width=40",
-          expertise: "Contractor",
-        },
-        timestamp: "2024-03-02T12:15:00Z",
-        likes: 8,
-      },
-    ],
-  },
-  {
-    id: 2,
-    content:
-      "Here's a tip: Use a laser level to ensure your tiles are perfectly straight. It makes a huge difference in the final look.",
-    author: {
-      name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40",
-      expertise: "DIY Expert",
-    },
-    timestamp: "2024-03-02T13:00:00Z",
-    likes: 6,
-    replies: [],
-  },
-];
+import { usePosts } from "@/lib/post-context";
 
 export default function PostDetail() {
   const router = useRouter();
+  const params = useParams();
+  const { getPost, addComment, toggleLike } = usePosts();
+
+  const [post, setPost] = useState<ReturnType<typeof getPost>>(undefined);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [newComment, setNewComment] = useState("");
-  const [comments, setComments] = useState(mockComments);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReplyingTo, setIsReplyingTo] = useState<number | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+
+  // Fetch post data based on ID
+  useEffect(() => {
+    if (params?.id) {
+      const postId = Number(params.id);
+      if (!isNaN(postId)) {
+        const foundPost = getPost(postId);
+        if (foundPost) {
+          setPost(foundPost);
+        } else {
+          // Post not found, redirect to home
+          router.push("/");
+        }
+      }
+    }
+  }, [params?.id, getPost, router]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
+    if (!post || !newComment.trim()) return;
 
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const newCommentObj = {
-      id: comments.length + 1,
+    
+    // Add comment
+    addComment(post.id, {
       content: newComment,
       author: {
         name: "Current User",
-        avatar: "/placeholder.svg?height=40&width=40",
+        avatar: "https://avatar.iran.liara.run/public/99",
         expertise: "Member",
       },
-      timestamp: new Date().toISOString(),
-      likes: 0,
-      replies: [],
-    };
+    });
 
-    setComments((prev) => [newCommentObj, ...prev]);
     setNewComment("");
     setIsSubmitting(false);
   };
+
+  const handleSubmitReply = async (commentId: number) => {
+    if (!post || !replyContent.trim()) return;
+
+    // Add reply
+    const postId = post.id;
+    
+    // Add comment
+    addComment(post.id, {
+      content: replyContent,
+      author: {
+        name: "Current User",
+        avatar: "https://avatar.iran.liara.run/public/99",
+        expertise: "Member",
+      },
+    });
+    
+    setReplyContent("");
+    setIsReplyingTo(null);
+  };
+
+  // Handle case where post is undefined or not yet loaded
+  if (!post) {
+    return <div className="p-4">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen pb-16">
@@ -150,8 +124,8 @@ export default function PostDetail() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Report Post</DropdownMenuItem>
-                <DropdownMenuItem>Copy Link</DropdownMenuItem>
+                <DropdownMenuItem>Beitrag melden</DropdownMenuItem>
+                <DropdownMenuItem>Link kopieren</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -179,11 +153,11 @@ export default function PostDetail() {
             </div>
             <div className="mt-2 flex gap-2">
               <Badge variant={post.type === "help" ? "destructive" : "default"}>
-                {post.type === "help" ? "Help Needed" : "Showcase"}
+                {post.type === "help" ? "Hilfe benötigt" : "Präsentation"}
               </Badge>
               <Badge variant="outline">{post.category}</Badge>
               {post.urgency && (
-                <Badge variant="secondary">Urgency: {post.urgency}</Badge>
+                <Badge variant="secondary">Dringlichkeit: {post.urgency}</Badge>
               )}
             </div>
           </div>
@@ -202,14 +176,14 @@ export default function PostDetail() {
             {post.images.map((image, index) => (
               <div
                 key={index}
-                className={`relative cursor-pointer ${index === 0 && post.images.length === 3 ? "col-span-2" : ""}`}
+                className={`relative cursor-pointer ${index === 0 && post.images!.length === 3 ? "col-span-2" : ""}`}
                 onClick={() => {
                   setSelectedImageIndex(index);
                   setImageViewerOpen(true);
                 }}
               >
                 <img
-                  src={image || "/placeholder.svg"}
+                  src={image ?? "/placeholder.svg"}
                   alt={`Post image ${index + 1}`}
                   className="h-48 w-full rounded-lg object-cover"
                 />
@@ -220,20 +194,24 @@ export default function PostDetail() {
 
         {/* Engagement Stats */}
         <div className="flex items-center justify-between border-y py-2">
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => toggleLike(post.id)}
+          >
             <Heart className="mr-2 h-4 w-4" />
             {post.likes} Likes
           </Button>
           <Button variant="ghost" size="sm">
             <MessageCircle className="mr-2 h-4 w-4" />
-            {comments.length} Comments
+            {post.commentsList?.length ?? 0} Kommentare
           </Button>
         </div>
 
         {/* Comment Input */}
         <form onSubmit={handleSubmitComment} className="flex gap-2">
           <Textarea
-            placeholder="Add a comment..."
+            placeholder="Kommentar hinzufügen..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             className="min-h-[44px] resize-none"
@@ -249,88 +227,119 @@ export default function PostDetail() {
 
         {/* Comments Section */}
         <div className="space-y-4">
-          {comments.map((comment) => (
-            <div key={comment.id} className="space-y-4">
-              <div className="flex gap-3">
-                <Avatar>
-                  <AvatarImage
-                    src={comment.author.avatar}
-                    alt={comment.author.name}
-                  />
-                  <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="font-semibold">
-                        {comment.author.name}
-                      </span>
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {comment.author.expertise}
+          {post.commentsList && post.commentsList.length > 0 ? (
+            post.commentsList.map((comment) => (
+              <div key={comment.id} className="space-y-4">
+                <div className="flex gap-3">
+                  <Avatar>
+                    <AvatarImage
+                      src={comment.author.avatar}
+                      alt={comment.author.name}
+                    />
+                    <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="font-semibold">
+                          {comment.author.name}
+                        </span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {comment.author.expertise}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatTimeAgo(new Date(comment.timestamp))}
                       </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {formatTimeAgo(new Date(comment.timestamp))}
-                    </span>
-                  </div>
-                  <p className="text-sm">{comment.content}</p>
-                  <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm">
-                      <Heart className="mr-1 h-3 w-3" />
-                      {comment.likes}
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      Reply
-                    </Button>
-                  </div>
+                    <p className="text-sm">{comment.content}</p>
+                    <div className="flex items-center gap-4">
+                      <Button variant="ghost" size="sm">
+                        <Heart className="mr-1 h-3 w-3" />
+                        {comment.likes}
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          if (isReplyingTo === comment.id) {
+                            setIsReplyingTo(null);
+                          } else {
+                            setIsReplyingTo(comment.id);
+                            setReplyContent("");
+                          }
+                        }}
+                      >
+                        Antworten
+                      </Button>
+                    </div>
 
-                  {/* Replies */}
-                  {comment.replies.length > 0 && (
-                    <div className="mt-4 space-y-4 border-l pl-4">
-                      {comment.replies.map((reply) => (
-                        <div key={reply.id} className="flex gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage
-                              src={reply.author.avatar}
-                              alt={reply.author.name}
-                            />
-                            <AvatarFallback>
-                              {reply.author.name[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <span className="font-semibold">
-                                  {reply.author.name}
-                                </span>
-                                <span className="ml-2 text-xs text-muted-foreground">
-                                  {reply.author.expertise}
+                    {/* Reply Form */}
+                    {isReplyingTo === comment.id && (
+                      <div className="mt-2 flex gap-2">
+                        <Textarea
+                          placeholder="Auf diesen Kommentar antworten..."
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          className="min-h-[44px] resize-none"
+                        />
+                        <Button
+                          size="icon"
+                          disabled={!replyContent.trim()}
+                          onClick={() => handleSubmitReply(comment.id)}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Replies */}
+                    {comment.replies.length > 0 && (
+                      <div className="mt-4 space-y-4 border-l pl-4">
+                        {comment.replies.map((reply) => (
+                          <div key={reply.id} className="flex gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={reply.author.avatar}
+                                alt={reply.author.name}
+                              />
+                              <AvatarFallback>
+                                {reply.author.name[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <span className="font-semibold">
+                                    {reply.author.name}
+                                  </span>
+                                  <span className="ml-2 text-xs text-muted-foreground">
+                                    {reply.author.expertise}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(reply.timestamp))}
                                 </span>
                               </div>
-                              <span className="text-xs text-muted-foreground">
-                                {formatTimeAgo(new Date(reply.timestamp))}
-                              </span>
-                            </div>
-                            <p className="text-sm">{reply.content}</p>
-                            <div className="flex items-center gap-4">
-                              <Button variant="ghost" size="sm">
-                                <Heart className="mr-1 h-3 w-3" />
-                                {reply.likes}
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                Reply
-                              </Button>
+                              <p className="text-sm">{reply.content}</p>
+                              <div className="flex items-center gap-4">
+                                <Button variant="ghost" size="sm">
+                                  <Heart className="mr-1 h-3 w-3" />
+                                  {reply.likes}
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground">Noch keine Kommentare. Sei der Erste!</p>
+          )}
         </div>
       </div>
 
@@ -340,7 +349,7 @@ export default function PostDetail() {
           <ScrollArea className="h-full">
             <div className="relative h-full w-full">
               <img
-                src={post.images?.[selectedImageIndex] || "/placeholder.svg"}
+                src={post.images?.[selectedImageIndex] ?? "/placeholder.svg"}
                 alt={`Post image ${selectedImageIndex + 1}`}
                 className="h-auto w-full"
               />

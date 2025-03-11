@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Inbox, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import ResetDataButton from "./reset-data-button"
 
 interface NavbarProps {
   toggleSidebar: () => void
@@ -17,6 +18,8 @@ export default function Navbar({ toggleSidebar }: NavbarProps) {
         </Button>
 
         <div className="flex items-center gap-4">
+          <ResetDataButton />
+          
           <Button variant="ghost" size="icon" asChild>
             <Link href="#">
               <Inbox className="h-6 w-6" />
@@ -26,7 +29,7 @@ export default function Navbar({ toggleSidebar }: NavbarProps) {
 
           <Link href="#">
             <Avatar>
-              <AvatarImage src="/placeholder.svg?height=40&width=40" alt="User" />
+              <AvatarImage src="https://avatar.iran.liara.run/public/100" alt="User" />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
           </Link>

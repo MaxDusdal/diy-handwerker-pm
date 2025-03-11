@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   MessageCircle,
@@ -26,98 +27,35 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import CreatePostSheet from "@/app/components/create-post-sheet";
+import { usePosts } from "@/lib/post-context";
+import { formatTimeAgo } from "@/lib/utils";
 
-// Mock data for posts
-const posts = [
-  {
-    id: 1,
-    type: "help",
-    title: "Need help with bathroom renovation",
-    content:
-      "I'm trying to renovate my bathroom but having issues with the tile layout. Any experts who can give advice on the best approach?",
-    category: "Plumbing",
-    images: ["/placeholder.svg?height=300&width=400"],
-    author: {
-      name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    timestamp: "2 hours ago",
-    likes: 24,
-    comments: 8,
-    urgency: "High",
-  },
-  {
-    id: 2,
-    type: "showcase",
-    title: "Kitchen Remodel Complete!",
-    content:
-      "Just finished this kitchen remodel project. Took 6 weeks but the results are amazing. Swipe to see before and after!",
-    category: "Interior",
-    images: [
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-    ],
-    author: {
-      name: "Sarah Wilson",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    timestamp: "5 hours ago",
-    likes: 156,
-    comments: 32,
-  },
-  {
-    id: 3,
-    type: "help",
-    title: "Electric outlet not working",
-    content:
-      "The outlet in my living room suddenly stopped working. Already checked the breaker. Any ideas what could be wrong?",
-    category: "Electrical",
-    author: {
-      name: "Mike Brown",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    timestamp: "1 day ago",
-    likes: 12,
-    comments: 15,
-    urgency: "Medium",
-  },
-  {
-    id: 4,
-    type: "showcase",
-    title: "DIY Backyard Fire Pit",
-    content:
-      "Built this fire pit over the weekend. Total cost was under $200. Here's how I did it!",
-    category: "Outdoor",
-    images: ["/placeholder.svg?height=300&width=400"],
-    author: {
-      name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    timestamp: "2 days ago",
-    likes: 89,
-    comments: 24,
-  },
-];
 
 const categories = [
-  "All",
-  "Plumbing",
-  "Electrical",
-  "Interior",
-  "Outdoor",
-  "Carpentry",
-  "Painting",
-  "HVAC",
+  "Alle",
+  "Sanitär",
+  "Elektrik",
+  "Innenausbau",
+  "Außenbereich",
+  "Zimmerei",
+  "Malerei",
+  "Heizung/Klima",
 ];
 
 export default function Home() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const router = useRouter();
+  const { posts, toggleLike } = usePosts();
+  const [selectedCategory, setSelectedCategory] = useState("Alle");
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
 
   const filteredPosts =
-    selectedCategory === "All"
+    selectedCategory === "Alle"
       ? posts
       : posts.filter((post) => post.category === selectedCategory);
+
+  const navigateToPost = (postId: number) => {
+    router.push(`/post/${postId}`);
+  };
 
   return (
     <div className="flex min-h-screen flex-col pb-16">
@@ -132,7 +70,7 @@ export default function Home() {
             </SheetTrigger>
             <SheetContent side="left">
               <SheetHeader>
-                <SheetTitle>Categories</SheetTitle>
+                <SheetTitle>Kategorien</SheetTitle>
               </SheetHeader>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {categories.map((category) => (
@@ -170,7 +108,10 @@ export default function Home() {
       <div className="flex-1 space-y-4 p-4">
         {filteredPosts.map((post) => (
           <Card key={post.id} className="overflow-hidden">
-            <CardHeader className="space-y-4">
+            <CardHeader 
+              className="space-y-4 cursor-pointer" 
+              onClick={() => navigateToPost(post.id)}
+            >
               <div className="flex items-start gap-2">
                 <Avatar>
                   <AvatarImage
@@ -183,18 +124,18 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{post.author.name}</span>
                     <span className="text-muted-foreground text-xs">
-                      • {post.timestamp}
+                      • {formatTimeAgo(new Date(post.timestamp))}
                     </span>
                   </div>
                   <div className="flex gap-2">
                     <Badge
                       variant={post.type === "help" ? "destructive" : "default"}
                     >
-                      {post.type === "help" ? "Help Needed" : "Showcase"}
+                      {post.type === "help" ? "Hilfe benötigt" : "Präsentation"}
                     </Badge>
                     <Badge variant="outline">{post.category}</Badge>
                     {post.urgency && (
-                      <Badge variant="secondary">Urgency: {post.urgency}</Badge>
+                      <Badge variant="secondary">Dringlichkeit: {post.urgency}</Badge>
                     )}
                   </div>
                 </div>
@@ -205,8 +146,11 @@ export default function Home() {
               </div>
             </CardHeader>
 
-            {post.images && (
-              <CardContent className="p-0">
+            {post.images && post.images.length > 0 && (
+              <CardContent 
+                className="p-0 cursor-pointer"
+                onClick={() => navigateToPost(post.id)}
+              >
                 <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto">
                   {post.images.map((image, index) => (
                     <div
@@ -214,8 +158,8 @@ export default function Home() {
                       className="relative w-full flex-none snap-center first:pl-4 last:pr-4"
                     >
                       <img
-                        src={image || "/placeholder.svg"}
-                        alt={`Post image ${index + 1}`}
+                        src={image ?? "/placeholder.svg"}
+                        alt={`Beitragsbild ${index + 1}`}
                         className="h-64 w-full rounded-md object-cover"
                       />
                     </div>
@@ -226,21 +170,35 @@ export default function Home() {
 
             <CardFooter className="p-4">
               <div className="flex w-full items-center gap-4">
-                <Button variant="ghost" size="sm" className="flex-1">
-                  <Heart className="mr-2 h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => toggleLike(post.id)}
+                >
+                  {post.liked ? (
+                    <Heart className="mr-2 h-4 w-4 fill-current text-red-500" />
+                  ) : (
+                    <Heart className="mr-2 h-4 w-4" />
+                  )}
                   {post.likes}
                 </Button>
-                <Button variant="ghost" size="sm" className="flex-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex-1" 
+                  onClick={() => navigateToPost(post.id)}
+                >
                   <MessageCircle className="mr-2 h-4 w-4" />
                   {post.comments}
                 </Button>
                 <Button variant="ghost" size="sm" className="flex-1">
                   <Share2 className="mr-2 h-4 w-4" />
-                  Share
+                  Teilen
                 </Button>
                 <Button variant="ghost" size="sm" className="flex-1">
                   <BookmarkPlus className="mr-2 h-4 w-4" />
-                  Save
+                  Speichern
                 </Button>
               </div>
             </CardFooter>
@@ -254,7 +212,7 @@ export default function Home() {
         className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
       >
         <Plus className="h-6 w-6" />
-        <span className="sr-only">Create Post</span>
+        <span className="sr-only">Beitrag erstellen</span>
       </Button>
 
       {/* Create Post Sheet */}
