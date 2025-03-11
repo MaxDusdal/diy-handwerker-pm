@@ -37,12 +37,6 @@ interface ChatRequest {
   messages: ChatMessage[];
 }
 
-interface ChatResponse {
-  answer?: string;
-  error?: string;
-  details?: string;
-}
-
 export async function POST(request: Request) {
   try {
     // Parse the request JSON

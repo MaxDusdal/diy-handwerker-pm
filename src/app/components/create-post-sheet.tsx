@@ -20,6 +20,7 @@ import remarkGfm from "remark-gfm"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 interface CreatePostSheetProps {
   open: boolean
@@ -299,7 +300,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
         <div className="grid grid-cols-3 gap-2">
           {selectedImages.map((image, index) => (
             <div key={index} className="relative aspect-square">
-              <img
+              <Image
                 src={image ?? "/placeholder.svg"}
                 alt={`Vorschau ${index + 1}`}
                 className="w-full h-full object-cover rounded-md"

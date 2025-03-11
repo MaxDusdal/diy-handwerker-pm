@@ -12,7 +12,7 @@ export default function BottomNav() {
 
         <Link href="/search" className="flex flex-col items-center justify-center flex-1">
           <Search className="h-6 w-6" />
-          <span className="text-xs mt-1">Search</span>
+          <span className="text-xs mt-1">DIY Anleitungen</span>
         </Link>
 
         <Link href="/chat" className="flex flex-col items-center justify-center flex-1">

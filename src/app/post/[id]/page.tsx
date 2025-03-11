@@ -27,7 +27,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatTimeAgo } from "@/lib/utils";
 import { usePosts } from "@/lib/post-context";
-
+import Image from "next/image";
 export default function PostDetail() {
   const router = useRouter();
   const params = useParams();
@@ -182,7 +182,7 @@ export default function PostDetail() {
                   setImageViewerOpen(true);
                 }}
               >
-                <img
+                <Image
                   src={image ?? "/placeholder.svg"}
                   alt={`Post image ${index + 1}`}
                   className="h-48 w-full rounded-lg object-cover"

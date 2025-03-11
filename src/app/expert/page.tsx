@@ -30,7 +30,6 @@ export default function ExpertPage() {
     filteredExperts,
     setSearchQuery,
     setSelectedSpecialty,
-    selectedExpert,
     startExpertChat
   } = useExperts();
   

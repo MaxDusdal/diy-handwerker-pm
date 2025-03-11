@@ -29,7 +29,7 @@ import {
 import CreatePostSheet from "@/app/components/create-post-sheet";
 import { usePosts } from "@/lib/post-context";
 import { formatTimeAgo } from "@/lib/utils";
-
+import Image from "next/image";
 
 const categories = [
   "Alle",
@@ -157,10 +157,12 @@ export default function Home() {
                       key={index}
                       className="relative w-full flex-none snap-center first:pl-4 last:pr-4"
                     >
-                      <img
+                      <Image
                         src={image ?? "/placeholder.svg"}
                         alt={`Beitragsbild ${index + 1}`}
                         className="h-64 w-full rounded-md object-cover"
+                        width={100}
+                        height={100}
                       />
                     </div>
                   ))}

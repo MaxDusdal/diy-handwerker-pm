@@ -1,5 +1,6 @@
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 interface SidebarProps {
   isOpen: boolean
@@ -24,24 +25,29 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <nav className="p-4">
           <ul className="space-y-2">
             <li>
-              <a href="#" className="block p-2 hover:bg-muted rounded-md">
+              <Link href="/" className="block p-2 hover:bg-muted rounded-md">
                 Home
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="block p-2 hover:bg-muted rounded-md">
+              <Link href="/search" className="block p-2 hover:bg-muted rounded-md">
+                DIY Anleitungen
+              </Link>
+            </li>
+            <li>
+              <Link href="#" className="block p-2 hover:bg-muted rounded-md">
                 Profile
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="block p-2 hover:bg-muted rounded-md">
+              <Link href="#" className="block p-2 hover:bg-muted rounded-md">
                 Settings
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="block p-2 hover:bg-muted rounded-md">
+              <Link href="#" className="block p-2 hover:bg-muted rounded-md">
                 Help
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>
