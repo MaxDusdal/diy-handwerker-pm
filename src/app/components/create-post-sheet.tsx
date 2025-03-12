@@ -60,6 +60,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
         avatar: "https://avatar.iran.liara.run/public/99",
         expertise: "Member",
       },
+      aiResponse: aiResponse.length > 0 ? aiResponse : undefined,
     })
 
     // Reset form

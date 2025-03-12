@@ -12,6 +12,8 @@ import {
   BookmarkPlus,
   MoreVertical,
   Send,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +30,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatTimeAgo } from "@/lib/utils";
 import { usePosts } from "@/lib/post-context";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+
 export default function PostDetail() {
   const router = useRouter();
   const params = useParams();
@@ -40,6 +47,7 @@ export default function PostDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReplyingTo, setIsReplyingTo] = useState<number | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const [isAiResponseExpanded, setIsAiResponseExpanded] = useState(false);
 
   // Fetch post data based on ID
   useEffect(() => {
@@ -97,10 +105,20 @@ export default function PostDetail() {
     setIsReplyingTo(null);
   };
 
+  // Function to truncate text
+  const truncateText = (text: string, maxLength: number) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
+
   // Handle case where post is undefined or not yet loaded
   if (!post) {
     return <div className="p-4">Loading...</div>;
   }
+
+  // Safe to use post properties now with type assertions
+  const aiResponseText = (post.aiResponse as string) || "";
+  const showExpandButton = aiResponseText.length > 300;
 
   return (
     <div className="min-h-screen pb-16">
@@ -169,6 +187,45 @@ export default function PostDetail() {
             {post.content}
           </p>
         </div>
+
+        {/* AI Response Section */}
+        {post.aiResponse && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50 p-4 my-3">
+            <div className="flex items-center gap-2 mb-2">
+              <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <h3 className="font-medium text-blue-600 dark:text-blue-400">KI-Vorschlag</h3>
+            </div>
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown
+                rehypePlugins={[rehypeHighlight, rehypeSanitize]}
+                remarkPlugins={[remarkGfm]}
+              >
+                {isAiResponseExpanded 
+                  ? aiResponseText 
+                  : truncateText(aiResponseText, 300)}
+              </ReactMarkdown>
+              
+              {showExpandButton && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsAiResponseExpanded(!isAiResponseExpanded)}
+                  className="mt-2 text-blue-600 dark:text-blue-400 flex items-center gap-1"
+                >
+                  {isAiResponseExpanded ? (
+                    <>
+                      Weniger anzeigen <ChevronUp className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      Mehr lesen <ChevronDown className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Image Gallery */}
         {post.images && post.images.length > 0 && (

@@ -40,6 +40,7 @@ export interface Post {
   comments: number; // number of comments (for list view)
   commentsList?: Comment[]; // actual comments (for detail view)
   urgency?: string;
+  aiResponse?: string; // AI-generated response for help requests
 }
 
 // Initial mock data for posts
