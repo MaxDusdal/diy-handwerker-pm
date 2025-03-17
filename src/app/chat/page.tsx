@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils";
 import "highlight.js/styles/github-dark.css";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useExperts } from "@/lib/experts-context";
+import { useExperts, ExpertMessage } from "@/lib/experts-context";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CreditCard, CheckCircle2, XCircle } from "lucide-react";
 
 interface StreamResponse {
   chunk?: string;
@@ -317,6 +319,83 @@ export default function ChatPage() {
     }
   };
 
+  // Add PaymentRequest component
+  function PaymentRequest({ paymentDetails }: { paymentDetails: NonNullable<ExpertMessage["paymentDetails"]> }) {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [status, setStatus] = useState<"pending" | "paid" | "cancelled">(paymentDetails.status);
+
+    const handlePayment = async () => {
+      setIsProcessing(true);
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setStatus("paid");
+      setIsProcessing(false);
+    };
+
+    const handleCancel = async () => {
+      setIsProcessing(true);
+      // Simulate cancellation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setStatus("cancelled");
+      setIsProcessing(false);
+    };
+
+    if (status === "paid") {
+      return (
+        <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+          <CheckCircle2 className="h-5 w-5" />
+          <span>Zahlung erfolgreich</span>
+        </div>
+      );
+    }
+
+    if (status === "cancelled") {
+      return (
+        <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+          <XCircle className="h-5 w-5" />
+          <span>Zahlung abgebrochen</span>
+        </div>
+      );
+    }
+
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-lg">Zahlungsanfrage</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Betrag:</span>
+              <span className="font-medium">{paymentDetails.amount}€</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Beschreibung:</span>
+              <span className="font-medium">{paymentDetails.description}</span>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex gap-2">
+          <Button 
+            className="flex-1" 
+            onClick={handlePayment}
+            disabled={isProcessing}
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Jetzt bezahlen
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleCancel}
+            disabled={isProcessing}
+          >
+            Abbrechen
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
   // Main layout
   return (
     <div className="flex h-[calc(100vh-8rem)]">
@@ -531,13 +610,18 @@ export default function ChatPage() {
                   {message.role === "user" ? (
                     <p>{message.content}</p>
                   ) : (
-                    <div className="markdown-content prose prose-sm max-w-none dark:prose-invert">
-                      <ReactMarkdown
-                        rehypePlugins={[rehypeHighlight, rehypeSanitize]}
-                        remarkPlugins={[remarkGfm]}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
+                    <div className="space-y-2">
+                      <div className="markdown-content prose prose-sm max-w-none dark:prose-invert">
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeHighlight, rehypeSanitize]}
+                          remarkPlugins={[remarkGfm]}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                      {message.type === "payment_request" && message.paymentDetails && (
+                        <PaymentRequest paymentDetails={message.paymentDetails} />
+                      )}
                     </div>
                   )}
                   <div className="mt-1 text-right text-xs opacity-70">

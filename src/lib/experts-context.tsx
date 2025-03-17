@@ -22,6 +22,13 @@ export interface ExpertMessage {
   content: string;
   timestamp: Date;
   read: boolean;
+  type?: "text" | "payment_request";
+  paymentDetails?: {
+    amount: number;
+    description: string;
+    status: "pending" | "paid" | "cancelled";
+    paymentId: string;
+  };
 }
 
 // Chat thread interface
@@ -127,6 +134,31 @@ const expertConversations: Record<string, ExpertMessage[]> = {
       content: "Haben Sie geprüft, ob der FI-Schalter ausgelöst wurde? Oft ist das der Grund, warum eine Steckdose plötzlich nicht mehr funktioniert.",
       timestamp: new Date(Date.now() - 85000000),
       read: true
+    },
+    {
+      role: "assistant",
+      content: "Basierend auf Ihrer Beschreibung, schlage ich vor, dass ich vorbeikomme und die Steckdose überprüfe. Die Kosten belaufen sich auf 60€ pro Stunde.",
+      timestamp: new Date(Date.now() - 84000000),
+      read: true
+    },
+    {
+      role: "user",
+      content: "Ja, das wäre gut. Können Sie heute noch vorbeikommen?",
+      timestamp: new Date(Date.now() - 83000000),
+      read: true
+    },
+    {
+      role: "assistant",
+      content: "Ich kann heute Nachmittag um 14:00 Uhr vorbeikommen. Bitte bestätigen Sie den Termin durch Zahlung der Vorabgebühr.",
+      timestamp: new Date(Date.now() - 82000000),
+      read: true,
+      type: "payment_request",
+      paymentDetails: {
+        amount: 60,
+        description: "Vorabgebühr für Elektrikerbesuch",
+        status: "pending",
+        paymentId: "PAY-123456"
+      }
     }
   ],
   // Sam Rodriguez (Sanitär) 
@@ -367,7 +399,6 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
         const thread = prev[expertId];
         if (!thread) return prev;
 
-        const expertName = thread.expert?.name ?? "Expert";
         const expertResponses = [
           `Danke für Ihre Nachricht! Ich werde Ihnen so schnell wie möglich antworten.`,
           `Vielen Dank für die Informationen. Haben Sie vielleicht Fotos, die mir bei der Einschätzung helfen könnten?`,

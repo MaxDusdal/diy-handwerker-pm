@@ -87,9 +87,6 @@ export default function PostDetail() {
 
   const handleSubmitReply = async (commentId: number) => {
     if (!post || !replyContent.trim()) return;
-
-    // Add reply
-    const postId = post.id;
     
     // Add comment
     addComment(post.id, {
@@ -117,7 +114,7 @@ export default function PostDetail() {
   }
 
   // Safe to use post properties now with type assertions
-  const aiResponseText = (post.aiResponse as string) || "";
+  const aiResponseText = post.aiResponse! || "";
   const showExpandButton = aiResponseText.length > 300;
 
   return (
@@ -240,9 +237,11 @@ export default function PostDetail() {
                 }}
               >
                 <Image
-                  src={image ?? "/placeholder.svg"}
+                  src={image ?? "/placeholder.svg?height=400&width=400"}
                   alt={`Post image ${index + 1}`}
                   className="h-48 w-full rounded-lg object-cover"
+                  width={400}
+                  height={400}
                 />
               </div>
             ))}
@@ -405,10 +404,12 @@ export default function PostDetail() {
         <DialogContent className="h-[90vh] max-w-full p-0">
           <ScrollArea className="h-full">
             <div className="relative h-full w-full">
-              <img
+              <Image
                 src={post.images?.[selectedImageIndex] ?? "/placeholder.svg"}
                 alt={`Post image ${selectedImageIndex + 1}`}
                 className="h-auto w-full"
+                width={400}
+                height={400}
               />
             </div>
           </ScrollArea>

@@ -53,14 +53,14 @@ const initialPosts: Post[] = [
       "Ich versuche mein Badezimmer zu renovieren, habe aber Probleme mit der Fliesenanordnung. Das Hauptproblem ist die Eckenverbindung, wo die Wand auf den Boden trifft. Ich habe verschiedene Ansätze probiert, aber keiner scheint einen sauberen Abschluss zu ergeben. Suche nach Expertenrat zur besten Vorgehensweise.\n\nKonkrete Fragen:\n1. Was ist der beste Weg, um Eckenübergänge zu handhaben?\n2. Sollte ich Silikon oder Fugenmasse für die Ecken verwenden?\n3. Gibt es spezielle Werkzeuge, die ich verwenden sollte?",
     category: "Sanitär",
     images: [
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400"
+      "/images/bathroom-renovation.jpg",
+      "/images/bathroom-renovation2.jpg",
+      "/images/bathroom-renovation3.jpg",
     ],
     author: {
       name: "John Doe",
       avatar: "https://avatar.iran.liara.run/public/1",
-      expertise: "DIY Enthusiast"
+      expertise: "DIY Enthusiast",
     },
     timestamp: "2024-03-02T10:00:00Z",
     likes: 24,
@@ -73,7 +73,7 @@ const initialPosts: Post[] = [
         author: {
           name: "Mike Wilson",
           avatar: "https://avatar.iran.liara.run/public/8",
-          expertise: "Professioneller Fliesenleger"
+          expertise: "Professioneller Fliesenleger",
         },
         timestamp: "2024-03-02T11:30:00Z",
         likes: 12,
@@ -85,12 +85,12 @@ const initialPosts: Post[] = [
             author: {
               name: "Sarah Johnson",
               avatar: "https://avatar.iran.liara.run/public/9",
-              expertise: "Bauunternehmer"
+              expertise: "Bauunternehmer",
             },
             timestamp: "2024-03-02T12:15:00Z",
-            likes: 8
-          }
-        ]
+            likes: 8,
+          },
+        ],
       },
       {
         id: 2,
@@ -99,14 +99,14 @@ const initialPosts: Post[] = [
         author: {
           name: "Emily Chen",
           avatar: "https://avatar.iran.liara.run/public/6",
-          expertise: "DIY-Experte"
+          expertise: "DIY-Experte",
         },
         timestamp: "2024-03-02T13:00:00Z",
         likes: 6,
-        replies: []
-      }
+        replies: [],
+      },
     ],
-    urgency: "Hoch"
+    urgency: "Hoch",
   },
   {
     id: 2,
@@ -115,14 +115,11 @@ const initialPosts: Post[] = [
     content:
       "Habe gerade dieses Küchenumbauprojekt beendet. Hat 6 Wochen gedauert, aber die Ergebnisse sind fantastisch. Wische, um Vorher und Nachher zu sehen!",
     category: "Innenausbau",
-    images: [
-      "/placeholder.svg?height=300&width=400",
-      "/placeholder.svg?height=300&width=400",
-    ],
+    images: ["/images/kitchen-renovation.jpg"],
     author: {
       name: "Sarah Wilson",
       avatar: "https://avatar.iran.liara.run/public/2",
-      expertise: "Heimwerker"
+      expertise: "Heimwerker",
     },
     timestamp: "2024-03-01T15:00:00Z",
     likes: 156,
@@ -130,17 +127,18 @@ const initialPosts: Post[] = [
     commentsList: [
       {
         id: 1,
-        content: "Wirklich beeindruckend! Wie lange hat die gesamte Renovierung gedauert?",
+        content:
+          "Wirklich beeindruckend! Wie lange hat die gesamte Renovierung gedauert?",
         author: {
           name: "Thomas Mueller",
           avatar: "https://avatar.iran.liara.run/public/5",
-          expertise: "Anfänger"
+          expertise: "Anfänger",
         },
         timestamp: "2024-03-01T16:30:00Z",
         likes: 5,
-        replies: []
-      }
-    ]
+        replies: [],
+      },
+    ],
   },
   {
     id: 3,
@@ -152,13 +150,14 @@ const initialPosts: Post[] = [
     author: {
       name: "Mike Brown",
       avatar: "https://avatar.iran.liara.run/public/3",
-      expertise: "Heimwerker"
+      expertise: "Heimwerker",
     },
+    images: ["/images/power-outlet.jpg"],
     timestamp: "2024-03-02T08:00:00Z",
     likes: 12,
     comments: 15,
     commentsList: [],
-    urgency: "Mittel"
+    urgency: "Mittel",
   },
   {
     id: 4,
@@ -167,26 +166,38 @@ const initialPosts: Post[] = [
     content:
       "Habe diese Feuerstelle am Wochenende gebaut. Die Gesamtkosten lagen unter 200€. So habe ich es gemacht!",
     category: "Außenbereich",
-    images: ["/placeholder.svg?height=300&width=400"],
+    images: ["/images/firepit.jpg"],
     author: {
       name: "Emily Chen",
       avatar: "https://avatar.iran.liara.run/public/4",
-      expertise: "DIY-Enthusiast"
+      expertise: "DIY-Enthusiast",
     },
     timestamp: "2024-03-01T10:00:00Z",
     likes: 89,
     comments: 24,
-    commentsList: []
-  }
+    commentsList: [],
+  },
 ];
 
 // Create the context
 interface PostContextType {
   posts: Post[];
-  addPost: (post: Omit<Post, "id" | "timestamp" | "likes" | "comments" | "commentsList">) => void;
+  addPost: (
+    post: Omit<
+      Post,
+      "id" | "timestamp" | "likes" | "comments" | "commentsList"
+    >,
+  ) => void;
   getPost: (id: number) => Post | undefined;
-  addComment: (postId: number, comment: Omit<Comment, "id" | "timestamp" | "likes" | "replies">) => void;
-  addReply: (postId: number, commentId: number, reply: Omit<Reply, "id" | "timestamp" | "likes">) => void;
+  addComment: (
+    postId: number,
+    comment: Omit<Comment, "id" | "timestamp" | "likes" | "replies">,
+  ) => void;
+  addReply: (
+    postId: number,
+    commentId: number,
+    reply: Omit<Reply, "id" | "timestamp" | "likes">,
+  ) => void;
   toggleLike: (postId: number) => void;
   resetPosts: () => void;
 }
@@ -213,94 +224,112 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("posts", JSON.stringify(posts));
   }, [posts]);
 
-  const addPost = (post: Omit<Post, "id" | "timestamp" | "likes" | "comments" | "commentsList">) => {
+  const addPost = (
+    post: Omit<
+      Post,
+      "id" | "timestamp" | "likes" | "comments" | "commentsList"
+    >,
+  ) => {
     const newPost: Post = {
       ...post,
-      id: Math.max(0, ...posts.map(p => p.id)) + 1,
+      id: Math.max(0, ...posts.map((p) => p.id)) + 1,
       timestamp: new Date().toISOString(),
       likes: 0,
       comments: 0,
-      commentsList: []
+      commentsList: [],
     };
-    
-    setPosts(prevPosts => [newPost, ...prevPosts]);
+
+    setPosts((prevPosts) => [newPost, ...prevPosts]);
   };
 
   const getPost = (id: number) => {
-    return posts.find(post => post.id === id);
+    return posts.find((post) => post.id === id);
   };
 
-  const addComment = (postId: number, comment: Omit<Comment, "id" | "timestamp" | "likes" | "replies">) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
+  const addComment = (
+    postId: number,
+    comment: Omit<Comment, "id" | "timestamp" | "likes" | "replies">,
+  ) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
         if (post.id === postId) {
           const newComment: Comment = {
             ...comment,
-            id: post.commentsList ? Math.max(0, ...post.commentsList.map(c => c.id)) + 1 : 1,
+            id: post.commentsList
+              ? Math.max(0, ...post.commentsList.map((c) => c.id)) + 1
+              : 1,
             timestamp: new Date().toISOString(),
             likes: 0,
-            replies: []
+            replies: [],
           };
-          
+
           return {
             ...post,
             comments: post.comments + 1,
-            commentsList: post.commentsList ? [newComment, ...post.commentsList] : [newComment]
+            commentsList: post.commentsList
+              ? [newComment, ...post.commentsList]
+              : [newComment],
           };
         }
         return post;
-      })
+      }),
     );
   };
 
-  const addReply = (postId: number, commentId: number, reply: Omit<Reply, "id" | "timestamp" | "likes">) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
+  const addReply = (
+    postId: number,
+    commentId: number,
+    reply: Omit<Reply, "id" | "timestamp" | "likes">,
+  ) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
         if (post.id === postId && post.commentsList) {
-          const updatedComments = post.commentsList.map(comment => {
+          const updatedComments = post.commentsList.map((comment) => {
             if (comment.id === commentId) {
               const newReply: Reply = {
                 ...reply,
-                id: comment.replies ? Math.max(0, ...comment.replies.map(r => r.id)) + 1 : 1,
+                id: comment.replies
+                  ? Math.max(0, ...comment.replies.map((r) => r.id)) + 1
+                  : 1,
                 timestamp: new Date().toISOString(),
-                likes: 0
+                likes: 0,
               };
-              
+
               return {
                 ...comment,
-                replies: [...comment.replies, newReply]
+                replies: [...comment.replies, newReply],
               };
             }
             return comment;
           });
-          
+
           return {
             ...post,
             comments: post.comments + 1,
-            commentsList: updatedComments
+            commentsList: updatedComments,
           };
         }
         return post;
-      })
+      }),
     );
   };
 
   const toggleLike = (postId: number) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => {
         if (post.id === postId) {
           // Toggle liked state and update like count accordingly
           const newLikedState = !post.liked;
           return {
             ...post,
             liked: newLikedState,
-            likes: newLikedState 
-              ? post.likes + 1  // If now liked, increment
-              : Math.max(0, post.likes - 1)  // If unliked, decrement but not below 0
+            likes: newLikedState
+              ? post.likes + 1 // If now liked, increment
+              : Math.max(0, post.likes - 1), // If unliked, decrement but not below 0
           };
         }
         return post;
-      })
+      }),
     );
   };
 
@@ -313,33 +342,33 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
   // Add a global window function for easy console access
   useEffect(() => {
     // Make the reset function available globally for debugging
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Define a type for our custom window object
       interface CustomWindow extends Window {
         resetPostsData?: () => void;
       }
-      
+
       // Cast window to our custom type
       const customWindow = window as CustomWindow;
-      
+
       // Add the reset function
       customWindow.resetPostsData = () => {
         localStorage.removeItem("posts");
         console.log("Posts data cleared. Reload the page to see changes.");
       };
     }
-    
+
     return () => {
       // Clean up the global function when unmounting
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         // Define a type for our custom window object
         interface CustomWindow extends Window {
           resetPostsData?: () => void;
         }
-        
+
         // Cast window to our custom type
         const customWindow = window as CustomWindow;
-        
+
         // Remove the function
         delete customWindow.resetPostsData;
       }
@@ -355,7 +384,7 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
         addComment,
         addReply,
         toggleLike,
-        resetPosts
+        resetPosts,
       }}
     >
       {children}
@@ -370,4 +399,4 @@ export function usePosts() {
     throw new Error("usePosts must be used within a PostProvider");
   }
   return context;
-} 
+}
