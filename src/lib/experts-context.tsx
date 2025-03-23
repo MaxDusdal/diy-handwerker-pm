@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useMemo, useCallback, useRef } from "react";
 
-// Define Expert interface
 export interface Expert {
   id: string;
   name: string;
@@ -16,7 +15,6 @@ export interface Expert {
   categories: string[];
 }
 
-// Chat message interface
 export interface ExpertMessage {
   role: "user" | "assistant";
   content: string;
@@ -31,7 +29,6 @@ export interface ExpertMessage {
   };
 }
 
-// Chat thread interface
 export interface ChatThread {
   expert?: Expert;
   messages: ExpertMessage[];
@@ -40,7 +37,6 @@ export interface ChatThread {
 
 export type ThreadsRecord = Record<string, ChatThread>;
 
-// Specialty options
 export const SPECIALTIES = [
   "Sanitär",
   "Elektrik",
@@ -49,7 +45,6 @@ export const SPECIALTIES = [
   "Allgemeiner Handwerker",
 ];
 
-// Mock experts data
 const MOCK_EXPERTS: Expert[] = [
   {
     id: "1",
@@ -113,7 +108,6 @@ const MOCK_EXPERTS: Expert[] = [
   },
 ];
 
-// Sample expert conversations only - no initial AI conversation
 const expertConversations: Record<string, ExpertMessage[]> = {
   // Alex Johnson (Elektrik)
   "1": [
@@ -184,9 +178,7 @@ const expertConversations: Record<string, ExpertMessage[]> = {
   ],
 };
 
-// Create initial chat threads - AI thread with just a welcome message, not a full conversation
 const createInitialThreads = (): ThreadsRecord => {
-  // Create AI thread with just a welcome message
   const aiThread: ChatThread = {
     messages: [
       {
@@ -199,12 +191,10 @@ const createInitialThreads = (): ThreadsRecord => {
     lastUpdated: new Date()
   };
 
-  // Create expert threads
   const threads: ThreadsRecord = {
     "ai": aiThread
   };
 
-  // Add sample conversation with Alex (Elektrik expert)
   const alexExpert = MOCK_EXPERTS.find(expert => expert.id === "1");
   if (alexExpert) {
     const alexMessages = expertConversations["1"] ?? [];
@@ -215,7 +205,6 @@ const createInitialThreads = (): ThreadsRecord => {
     };
   }
 
-  // Add sample conversation with Jamie (Tischlerei expert)
   const jamieExpert = MOCK_EXPERTS.find(expert => expert.id === "3");
   if (jamieExpert) {
     const jamieMessages = expertConversations["3"] ?? [];
@@ -229,7 +218,6 @@ const createInitialThreads = (): ThreadsRecord => {
   return threads;
 };
 
-// Create the context
 export interface ExpertsContextType {
   experts: Expert[];
   filteredExperts: Expert[];
@@ -260,10 +248,8 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
   const [activeThread, setActiveThread] = useState<string>("ai");
   const [threads, setThreads] = useState<ThreadsRecord>(createInitialThreads());
   
-  // Use a ref to track if a thread was just updated to prevent infinite loops
   const updatingThreadRef = useRef<string | null>(null);
 
-  // Filter experts based on search query and specialty
   const filteredExperts = useMemo(() => {
     return experts.filter((expert) => {
       const matchesQuery = searchQuery === "" || 
@@ -277,14 +263,11 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     });
   }, [experts, searchQuery, selectedSpecialty]);
 
-  // Get experts by category
   const getExpertsByCategory = useCallback((category: string) => {
     return experts.filter(expert => expert.categories.includes(category));
   }, [experts]);
 
-  // Reset AI chat to just the welcome message
   const resetAIChat = useCallback(() => {
-    // Create a completely fresh AI thread with just the welcome message
     setThreads(prev => ({
       ...prev,
       ai: {
@@ -301,9 +284,7 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  // Send message to AI assistant
   const sendMessageToAI = async (message: string) => {
-    // Add user message
     setThreads(prev => {
       const aiThread = prev.ai;
       if (!aiThread) return prev;
@@ -329,11 +310,8 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     });
 
     try {
-      // Simulate AI response
-      // In a real application, this would be a call to the AI API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Add AI response
       setThreads(prev => {
         const aiThread = prev.ai;
         if (!aiThread) return prev;
@@ -362,9 +340,7 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Send message to expert
   const sendMessageToExpert = async (expertId: string, message: string) => {
-    // Add user message
     setThreads(prev => {
       const thread = prev[expertId];
       if (!thread) return prev;
@@ -390,11 +366,8 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     });
 
     try {
-      // Simulate expert response
-      // In a real application, this would notify the expert and handle their response
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Add expert response
       setThreads(prev => {
         const thread = prev[expertId];
         if (!thread) return prev;
@@ -432,7 +405,6 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Check if thread has unread messages
   const hasUnreadMessages = (threadId: string): boolean => {
     const thread = threads[threadId];
     if (!thread) return false;
@@ -440,9 +412,7 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
     return thread.messages.some(msg => msg.role === "assistant" && !msg.read);
   };
 
-  // Mark all messages in a thread as read
   const markThreadAsRead = (threadId: string) => {
-    // Prevent infinite loops by checking if we're already updating this thread
     if (updatingThreadRef.current === threadId) return;
     
     updatingThreadRef.current = threadId;
@@ -451,7 +421,6 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
       const thread = prev[threadId];
       if (!thread) return prev;
       
-      // Check if there are any unread messages before updating
       const hasUnread = thread.messages.some(msg => msg.role === "assistant" && !msg.read);
       if (!hasUnread) return prev;
       
@@ -469,17 +438,13 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
       };
     });
     
-    // Clear the updating ref after a short delay
     setTimeout(() => {
       updatingThreadRef.current = null;
     }, 100);
   };
 
-  // Start a chat with an expert (create thread if it doesn't exist)
   const startExpertChat = (expert: Expert) => {
-    // Check if thread already exists
     if (!threads[expert.id]) {
-      // Create new thread
       setThreads(prev => ({
         ...prev,
         [expert.id]: {
@@ -497,11 +462,9 @@ export function ExpertsProvider({ children }: { children: React.ReactNode }) {
       }));
     }
     
-    // Set active thread to this expert
     setActiveThread(expert.id);
   };
 
-  // Update threads directly with a new threads record
   const updateThreads = (newThreads: ThreadsRecord) => {
     setThreads(newThreads);
   };

@@ -42,22 +42,15 @@ export default function ChatPage() {
   const [isMobileView, setIsMobileView] = useState(false);
   const [showChatList, setShowChatList] = useState(true);
 
-  // Check URL for expert ID
   useEffect(() => {
-    // Only reset AI chat, but don't change activeThread if there's already one set
-    // This ensures when coming from "Contact Expert", we preserve that thread
     resetAIChat();
 
-    // If no active thread is set, default to AI
     if (!activeThread) {
       setActiveThread("ai");
     }
 
-    // If we came from the expert page via "contact expert",
-    // the thread would already be set before navigating here
   }, [resetAIChat, setActiveThread, activeThread]);
 
-  // Handle responsive view
   useEffect(() => {
     const checkScreenSize = () => {
       const isMobile = window.innerWidth < 768;
@@ -70,14 +63,12 @@ export default function ChatPage() {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [activeThread]);
 
-  // When selecting a thread on mobile, hide the chat list
   useEffect(() => {
     if (isMobileView && activeThread) {
       setShowChatList(false);
     }
   }, [isMobileView, activeThread]);
 
-  // Reset AI chat on initial load
   useEffect(() => {
     if (!initialLoadDone) {
       resetAIChat();
@@ -85,7 +76,6 @@ export default function ChatPage() {
     }
   }, [resetAIChat, initialLoadDone]);
 
-  // Mark messages as read when switching to a thread, but with debounce to prevent infinite loops
   useEffect(() => {
     if (!activeThread || !initialLoadDone) return;
 
@@ -107,10 +97,8 @@ export default function ChatPage() {
 
     try {
       if (activeThread === "ai") {
-        // Handle AI message differently with streaming
         await sendMessageToAI(userMessage);
       } else {
-        // This is an expert thread
         await sendMessageToExpert(activeThread, userMessage);
       }
     } catch (error) {
@@ -120,10 +108,8 @@ export default function ChatPage() {
     }
   };
 
-  // Send message to AI with streaming
   const sendMessageToAI = async (message: string) => {
     try {
-      // Add the user message to the threads state
       const updatedMessages = [
         ...threads.ai!.messages,
         {
@@ -134,7 +120,6 @@ export default function ChatPage() {
         },
       ];
 
-      // Add temporary assistant message for streaming
       const tempMessages = [
         ...updatedMessages,
         {
@@ -145,21 +130,18 @@ export default function ChatPage() {
         },
       ];
 
-      // First, update with empty assistant message (will be filled by stream)
       const tempThread = {
         ...threads.ai!,
         messages: tempMessages,
         lastUpdated: new Date(),
       };
 
-      // Use the experts context to update state
       setActiveThread("ai");
       updateThreads({
         ...threads,
         ai: tempThread,
       });
 
-      // Send to the API using streaming - only send the current message
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -180,13 +162,12 @@ export default function ChatPage() {
         throw new Error(error?.error ?? "Failed to get a response");
       }
 
-      // Handle the stream
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response stream available");
 
       const decoder = new TextDecoder();
       let done = false;
-      let fullText = ""; // Track the complete response
+      let fullText = "";
       let partialChunk = "";
 
       while (!done) {
@@ -205,7 +186,6 @@ export default function ChatPage() {
             const data = trimmedLine.slice(6);
 
             if (data === "[DONE]") {
-              // Stream is done
               continue;
             }
 
@@ -222,10 +202,8 @@ export default function ChatPage() {
                 fullText += parsedData.chunk;
               }
 
-              // Update the last message content with the current fullText
               const newMessages = [...updatedMessages];
 
-              // Add or update the assistant message
               newMessages.push({
                 role: "assistant" as const,
                 content: fullText,
@@ -233,7 +211,6 @@ export default function ChatPage() {
                 read: true,
               });
 
-              // Update the threads state with the new messages
               const updatedAiThread = {
                 ...threads.ai!,
                 messages: newMessages,
@@ -252,7 +229,6 @@ export default function ChatPage() {
       }
     } catch (error) {
       console.error("Error sending message to AI:", error);
-      // Add error message
       const updatedMessages = [
         ...threads.ai!.messages,
         {
@@ -276,12 +252,10 @@ export default function ChatPage() {
     }
   };
 
-  // Helper function to format timestamps
   const formatTimestamp = (date: Date) => {
     return format(date, "HH:mm", { locale: de });
   };
 
-  // Helper function to get last message preview
   const getLastMessagePreview = (threadId: string) => {
     const thread = threads[threadId];
     if (!thread || thread.messages.length === 0) return "";
@@ -295,23 +269,19 @@ export default function ChatPage() {
       : preview;
   };
 
-  // Get current thread messages
   const currentMessages = activeThread
     ? (threads[activeThread]?.messages ?? [])
     : [];
 
-  // Get current thread details
   const currentExpert =
     activeThread && activeThread !== "ai"
       ? threads[activeThread]?.expert
       : null;
 
-  // Handler for back button on mobile
   const handleBackToList = () => {
     setShowChatList(true);
   };
 
-  // Handler for selecting a chat
   const handleSelectChat = (threadId: string) => {
     setActiveThread(threadId);
     if (isMobileView) {
@@ -319,14 +289,12 @@ export default function ChatPage() {
     }
   };
 
-  // Add PaymentRequest component
   function PaymentRequest({ paymentDetails }: { paymentDetails: NonNullable<ExpertMessage["paymentDetails"]> }) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [status, setStatus] = useState<"pending" | "paid" | "cancelled">(paymentDetails.status);
 
     const handlePayment = async () => {
       setIsProcessing(true);
-      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       setStatus("paid");
       setIsProcessing(false);
@@ -334,7 +302,6 @@ export default function ChatPage() {
 
     const handleCancel = async () => {
       setIsProcessing(true);
-      // Simulate cancellation
       await new Promise(resolve => setTimeout(resolve, 1000));
       setStatus("cancelled");
       setIsProcessing(false);
@@ -396,10 +363,8 @@ export default function ChatPage() {
     );
   }
 
-  // Main layout
   return (
     <div className="flex h-[calc(100vh-8rem)]">
-      {/* Chat List Sidebar */}
       {(showChatList || !isMobileView) && (
         <div
           className={cn(
@@ -411,7 +376,6 @@ export default function ChatPage() {
             <h1 className="text-xl font-bold">Chats</h1>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {/* AI Chat */}
             <button
               className={cn(
                 "flex w-full items-center gap-3 border-b p-3 text-left hover:bg-muted/50",
@@ -442,7 +406,6 @@ export default function ChatPage() {
               )}
             </button>
 
-            {/* Expert Chats */}
             {Object.entries(threads)
               .filter(([id, thread]) => id !== "ai" && thread.expert)
               .map(([id, thread]) => (
@@ -498,10 +461,8 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Chat View */}
       {(!showChatList || !isMobileView) && activeThread && (
         <div className="flex flex-1 flex-col">
-          {/* Chat header with avatar and info */}
           <div className="border-b bg-background p-4">
             <div className="flex items-center gap-4">
               {isMobileView && (
@@ -566,7 +527,6 @@ export default function ChatPage() {
             </div>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
             {currentMessages.map((message, index) => (
               <div
@@ -667,7 +627,6 @@ export default function ChatPage() {
             )}
           </div>
 
-          {/* Message Input */}
           <div className="border-t bg-background p-3">
             <form
               className="flex gap-2"

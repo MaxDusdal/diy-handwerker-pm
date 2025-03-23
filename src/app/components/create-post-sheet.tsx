@@ -47,7 +47,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Add post to context
     addPost({
       type: postType,
       title,
@@ -63,7 +62,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
       aiResponse: aiResponse.length > 0 ? aiResponse : undefined,
     })
 
-    // Reset form
     resetForm()
     setIsSubmitting(false)
     onOpenChange(false)
@@ -84,8 +82,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
-      // In a real app, you would upload these files to your storage
-      // For now, we'll just create object URLs
       const newImages = Array.from(files).map((file) => URL.createObjectURL(file))
       setSelectedImages((prev) => [...prev, ...newImages])
     }
@@ -116,7 +112,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
         throw new Error("Failed to get AI response");
       }
 
-      // Handle streaming response
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response stream available");
 
@@ -182,57 +177,45 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
   };
 
   const handleProblemSolved = () => {
-    // Close the sheet as the problem is solved
     resetForm()
     onOpenChange(false)
   }
 
   const handleContactExpert = () => {
-    // Find relevant experts based on category
     const categoryExperts = getExpertsByCategory(category)
     
-    // Add some default experts if category doesn't have enough
     let expertsToShow = [...categoryExperts]
     
     if (expertsToShow.length < 3) {
-      // Add other experts to show at least 3 options
       const defaultExperts = getExpertsByCategory("Reparaturen")
         .filter(expert => !expertsToShow.some(e => e.id === expert.id))
       
-      // Add default experts to fill up to at least 3 options
       expertsToShow = [...expertsToShow, ...defaultExperts.slice(0, 3 - expertsToShow.length)]
     }
     
-    // Set the experts and go to expert selection step
     setAvailableExperts(expertsToShow)
-    setStep(4) // New step for expert selection
+    setStep(4) 
   }
 
   const handleSelectExpert = (expert: typeof experts[0]) => {
-    // Start chat with selected expert
     startExpertChat(expert)
     
-    // Reset form and close sheet
     resetForm()
     onOpenChange(false)
     
-    // Navigate to chat page
-    // Use small timeout to ensure thread is created before navigation
     setTimeout(() => {
       router.push("/chat")
     }, 50)
   }
 
   const handleBackToAiResponse = () => {
-    setStep(2) // Go back to AI response step
+    setStep(2)
   }
 
   const handleContinueToPost = () => {
-    // Proceed to post creation
     setStep(3)
   }
 
-  // Step 1: Problem Description
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -348,7 +331,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
     </div>
   );
 
-  // Step 2: AI Response and User Decision
   const renderStep2 = () => (
     <div className="space-y-6">
       <Card>
@@ -389,7 +371,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
     </div>
   );
 
-  // Step 3: Final Post Details
   const renderStep3 = () => (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
@@ -441,7 +422,6 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
     </form>
   );
 
-  // Step 4: Expert Selection
   const renderStep4 = () => (
     <div className="space-y-6">
       <div className="flex items-center mb-4">

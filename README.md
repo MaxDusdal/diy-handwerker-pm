@@ -1,29 +1,40 @@
-# Create T3 App
+# DIY-Handwerker-PM
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Ein interaktives Mockup für eine DIY-Heimwerker Community-Plattform, entwickelt als Projektarbeit für das Modul Projektmanagement.
 
-## What's next? How do I make an app with this?
+## Projektbeschreibung
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+Diese Plattform bietet Heimwerkern die Möglichkeit, Projekte zu teilen, Hilfe anzufordern und Anleitungen zu finden. Das Mockup demonstriert folgende Kernfunktionen:
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- **Social-Media Feed**: Modernes Interface zum Teilen von DIY-Projekten, ähnlich Instagram/TikTok
+- **Hilfefunktion**: Nutzer können Fragen stellen und Hilfe bei Projekten erhalten
+- **Anleitungssuche**: Durchsuchbare Datenbank mit DIY-Tutorials und Schritt-für-Schritt-Anleitungen
+- **KI-Integration**: Automatische Vorschläge und Hilfestellungen durch die Gemini API
 
+## Hinweis
+
+Dies ist ein rough and dirty Mockup, das lediglich zur Demonstration unserer Projektidee dient, die Güte des Codes oder des UI unterliegt keiner Verbesserung und als Randaufgabe ist dementsprechend auch kein hoher Qualitätsstandard zu erwarten. Die Anwendung läuft vollständig lokal und ist nicht für den Produktiveinsatz gedacht.
+
+## Technologie-Stack
+
+Das Projekt basiert auf dem [T3 Stack](https://create.t3.gg/):
 - [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- [TypeScript](https://www.typescriptlang.org/)
+- [shadcn/ui](https://ui.shadcn.com/) für Komponenten
+- [Gemini API](https://ai.google.dev/) für KI-Funktionalitäten
 
-## Learn More
+## Installation und Start
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+1. Repository klonen
+2. Abhängigkeiten installieren:
+   ```bash
+   npm install
+   ```
+3. Die `.env.example` Datei kopieren zu `.env` und deinen Gemini API Key eintragen
+4. Entwicklungsserver starten:
+   ```bash
+   npm run dev
+   ```
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+**Wichtig**: Für die volle Funktionalität ist ein Gemini API Key erforderlich, der in der `.env` Datei nach dem in `.env.example` gezeigten Muster konfiguriert werden muss.

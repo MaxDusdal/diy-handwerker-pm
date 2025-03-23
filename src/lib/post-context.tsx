@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-// Define types
 export interface Author {
   name: string;
   avatar: string;
@@ -36,14 +35,13 @@ export interface Post {
   author: Author;
   timestamp: string;
   likes: number;
-  liked?: boolean; // Track if current user has liked this post
-  comments: number; // number of comments (for list view)
-  commentsList?: Comment[]; // actual comments (for detail view)
+  liked?: boolean;
+  comments: number;
+  commentsList?: Comment[];
   urgency?: string;
-  aiResponse?: string; // AI-generated response for help requests
+  aiResponse?: string;
 }
 
-// Initial mock data for posts
 const initialPosts: Post[] = [
   {
     id: 1,
@@ -179,7 +177,6 @@ const initialPosts: Post[] = [
   },
 ];
 
-// Create the context
 interface PostContextType {
   posts: Post[];
   addPost: (
@@ -207,7 +204,6 @@ const PostContext = createContext<PostContextType | undefined>(undefined);
 export function PostProvider({ children }: { children: React.ReactNode }) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
 
-  // Attempt to load posts from localStorage on initial render
   useEffect(() => {
     const savedPosts = localStorage.getItem("posts");
     if (savedPosts) {
@@ -219,7 +215,6 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save posts to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("posts", JSON.stringify(posts));
   }, [posts]);
@@ -318,14 +313,13 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
     setPosts((prevPosts) =>
       prevPosts.map((post) => {
         if (post.id === postId) {
-          // Toggle liked state and update like count accordingly
           const newLikedState = !post.liked;
           return {
             ...post,
             liked: newLikedState,
             likes: newLikedState
-              ? post.likes + 1 // If now liked, increment
-              : Math.max(0, post.likes - 1), // If unliked, decrement but not below 0
+              ? post.likes + 1
+              : Math.max(0, post.likes - 1),
           };
         }
         return post;
@@ -333,25 +327,19 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  // Reset posts to initial state
   const resetPosts = () => {
     localStorage.removeItem("posts");
     setPosts(initialPosts);
   };
 
-  // Add a global window function for easy console access
   useEffect(() => {
-    // Make the reset function available globally for debugging
     if (typeof window !== "undefined") {
-      // Define a type for our custom window object
       interface CustomWindow extends Window {
         resetPostsData?: () => void;
       }
 
-      // Cast window to our custom type
       const customWindow = window as CustomWindow;
 
-      // Add the reset function
       customWindow.resetPostsData = () => {
         localStorage.removeItem("posts");
         console.log("Posts data cleared. Reload the page to see changes.");
@@ -359,17 +347,13 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
     }
 
     return () => {
-      // Clean up the global function when unmounting
       if (typeof window !== "undefined") {
-        // Define a type for our custom window object
         interface CustomWindow extends Window {
           resetPostsData?: () => void;
         }
 
-        // Cast window to our custom type
         const customWindow = window as CustomWindow;
 
-        // Remove the function
         delete customWindow.resetPostsData;
       }
     };
@@ -392,7 +376,6 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Custom hook to use the post context
 export function usePosts() {
   const context = useContext(PostContext);
   if (context === undefined) {

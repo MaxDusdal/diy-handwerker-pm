@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-// Sample data for the instruction pages
 const anleitungen = [
   {
     id: "1",
@@ -349,17 +348,14 @@ const anleitungen = [
       "Halten Sie die Bohrmaschine während des Bohrens immer gerade, um das Verkanten des Bohrers zu vermeiden",
     ],
   },
-  // More instructions would be defined here
 ];
 
 export default function AnleitungDetailPage() {
   const params = useParams();
   const { id } = params;
 
-  // Find the instruction by ID
   const anleitung = anleitungen.find((a) => a.id === id);
 
-  // Fallback if instruction is not found
   if (!anleitung) {
     return (
       <div className="container mx-auto py-8 text-center">
@@ -376,14 +372,12 @@ export default function AnleitungDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Back button */}
       <div className="mb-6">
         <Button variant="outline" asChild>
           <Link href="/search">← Zurück zur Suche</Link>
         </Button>
       </div>
 
-      {/* Header section */}
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <h1 className="mb-2 text-3xl font-bold">{anleitung.title}</h1>
@@ -446,7 +440,6 @@ export default function AnleitungDetailPage() {
 
       <Separator className="my-8" />
 
-      {/* Steps section - now showing all steps vertically */}
       <div className="mb-8">
         <h2 className="mb-6 text-2xl font-bold">
           Schritt-für-Schritt Anleitung
@@ -475,14 +468,11 @@ export default function AnleitungDetailPage() {
                   ></div>
                 </div>
               </div>
-
-
             </div>
           ))}
         </div>
       </div>
 
-      {/* Tips section */}
       {anleitung.tips && anleitung.tips.length > 0 && (
         <div className="mb-8">
           <h2 className="mb-4 text-2xl font-bold">Profi-Tipps</h2>
@@ -494,7 +484,6 @@ export default function AnleitungDetailPage() {
         </div>
       )}
 
-      {/* Related instructions placeholder */}
       <div className="mt-12">
         <h2 className="mb-4 text-2xl font-bold">Verwandte Anleitungen</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

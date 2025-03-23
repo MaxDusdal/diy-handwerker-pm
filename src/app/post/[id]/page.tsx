@@ -49,7 +49,6 @@ export default function PostDetail() {
   const [replyContent, setReplyContent] = useState("");
   const [isAiResponseExpanded, setIsAiResponseExpanded] = useState(false);
 
-  // Fetch post data based on ID
   useEffect(() => {
     if (params?.id) {
       const postId = Number(params.id);
@@ -58,7 +57,6 @@ export default function PostDetail() {
         if (foundPost) {
           setPost(foundPost);
         } else {
-          // Post not found, redirect to home
           router.push("/");
         }
       }
@@ -71,7 +69,6 @@ export default function PostDetail() {
 
     setIsSubmitting(true);
     
-    // Add comment
     addComment(post.id, {
       content: newComment,
       author: {
@@ -88,7 +85,6 @@ export default function PostDetail() {
   const handleSubmitReply = async (commentId: number) => {
     if (!post || !replyContent.trim()) return;
     
-    // Add comment
     addComment(post.id, {
       content: replyContent,
       author: {
@@ -102,25 +98,26 @@ export default function PostDetail() {
     setIsReplyingTo(null);
   };
 
-  // Function to truncate text
   const truncateText = (text: string, maxLength: number) => {
     if (!text || text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
   };
 
-  // Handle case where post is undefined or not yet loaded
   if (!post) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
   }
 
-  // Safe to use post properties now with type assertions
   const aiResponseText = post.aiResponse! || "";
   const showExpandButton = aiResponseText.length > 300;
+  const hasImage = post.images && post.images.length > 0;
 
   return (
-    <div className="min-h-screen pb-16">
-      {/* Header */}
-      <div className="sticky top-0 z-20 border-b bg-background">
+    <div className="min-h-screen pb-16 bg-background">
+      <div className="sticky top-0 z-20 backdrop-blur-md bg-background/80 border-b">
         <div className="flex items-center justify-between p-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-6 w-6" />
@@ -147,26 +144,45 @@ export default function PostDetail() {
         </div>
       </div>
 
-      {/* Post Content */}
-      <div className="space-y-4 p-4">
-        <div className="flex items-start gap-3">
-          <Avatar className="h-12 w-12">
-            <AvatarImage src={post.author.avatar} alt={post.author.name} />
-            <AvatarFallback>{post.author.name[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="flex items-start justify-between">
+      <div className="relative">
+        <div className="relative h-[350px] w-full md:h-[400px]">
+          {hasImage && post.images && post.images.length > 0 ? (
+            <Image
+              src={post.images[0] ?? "/placeholder.svg"}
+              alt={post.title}
+              className="h-full w-full object-cover"
+              fill
+              priority
+            />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-b from-primary/20 to-background" />
+          )}
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 border-2 border-background">
+                <AvatarImage src={post.author.avatar} alt={post.author.name} />
+                <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+              </Avatar>
               <div>
-                <h2 className="font-semibold">{post.author.name}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {post.author.expertise}
-                </p>
+                <div className="font-semibold">{post.author.name}</div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>{post.author.expertise}</span>
+                  <span>•</span>
+                  <span>{formatTimeAgo(new Date(post.timestamp))}</span>
+                </div>
               </div>
-              <span className="text-sm text-muted-foreground">
-                {formatTimeAgo(new Date(post.timestamp))}
-              </span>
             </div>
-            <div className="mt-2 flex gap-2">
+
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{post.title}</h1>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
               <Badge variant={post.type === "help" ? "destructive" : "default"}>
                 {post.type === "help" ? "Hilfe benötigt" : "Präsentation"}
               </Badge>
@@ -177,19 +193,21 @@ export default function PostDetail() {
             </div>
           </div>
         </div>
+      </div>
 
-        <div>
-          <h1 className="mb-2 text-xl font-bold">{post.title}</h1>
+      <div className="space-y-4 px-4 pt-4">
+        <div className="mt-4">
           <p className="whitespace-pre-line text-muted-foreground">
             {post.content}
           </p>
         </div>
 
-        {/* AI Response Section */}
         {post.aiResponse && (
-          <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50 p-4 my-3">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/30 p-4 my-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
-              <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
+                <MessageCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
               <h3 className="font-medium text-blue-600 dark:text-blue-400">KI-Vorschlag</h3>
             </div>
             <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -224,22 +242,21 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Image Gallery */}
-        {post.images && post.images.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
-            {post.images.map((image, index) => (
+        {post.images && post.images.length > 1 && (
+          <div className="grid grid-cols-2 gap-2 my-4">
+            {post.images.slice(1).map((image, index) => (
               <div
-                key={index}
-                className={`relative cursor-pointer ${index === 0 && post.images!.length === 3 ? "col-span-2" : ""}`}
+                key={index + 1}
+                className="relative cursor-pointer overflow-hidden rounded-xl"
                 onClick={() => {
-                  setSelectedImageIndex(index);
+                  setSelectedImageIndex(index + 1); // +1 since we're starting from the second image
                   setImageViewerOpen(true);
                 }}
               >
                 <Image
-                  src={image ?? "/placeholder.svg?height=400&width=400"}
-                  alt={`Post image ${index + 1}`}
-                  className="h-48 w-full rounded-lg object-cover"
+                  src={image ?? "/placeholder.svg"}
+                  alt={`Post image ${index + 2}`}
+                  className="h-48 w-full object-cover transition-transform hover:scale-105"
                   width={400}
                   height={400}
                 />
@@ -248,44 +265,49 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Engagement Stats */}
-        <div className="flex items-center justify-between border-y py-2">
+        <div className="flex items-center justify-between border-y py-3 my-2">
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => toggleLike(post.id)}
+            className="rounded-full"
           >
-            <Heart className="mr-2 h-4 w-4" />
+            {post.liked ? (
+              <Heart className="mr-2 h-4 w-4 fill-current text-red-500" />
+            ) : (
+              <Heart className="mr-2 h-4 w-4" />
+            )}
             {post.likes} Likes
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="rounded-full">
             <MessageCircle className="mr-2 h-4 w-4" />
             {post.commentsList?.length ?? 0} Kommentare
           </Button>
         </div>
 
-        {/* Comment Input */}
-        <form onSubmit={handleSubmitComment} className="flex gap-2">
+        <form onSubmit={handleSubmitComment} className="flex gap-2 my-4">
           <Textarea
             placeholder="Kommentar hinzufügen..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            className="min-h-[44px] resize-none"
+            className="min-h-[48px] resize-none rounded-full px-4 py-3"
           />
           <Button
             type="submit"
             size="icon"
             disabled={!newComment.trim() || isSubmitting}
+            className="rounded-full h-12 w-12 flex-shrink-0"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5" />
           </Button>
         </form>
 
-        {/* Comments Section */}
-        <div className="space-y-4">
+        <div className="space-y-6 py-2">
+          <h3 className="font-semibold text-lg">Kommentare</h3>
+          
           {post.commentsList && post.commentsList.length > 0 ? (
             post.commentsList.map((comment) => (
-              <div key={comment.id} className="space-y-4">
+              <div key={comment.id} className="space-y-4 rounded-xl border border-border/40 p-4">
                 <div className="flex gap-3">
                   <Avatar>
                     <AvatarImage
@@ -294,7 +316,7 @@ export default function PostDetail() {
                     />
                     <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-2">
                     <div className="flex items-start justify-between">
                       <div>
                         <span className="font-semibold">
@@ -310,13 +332,14 @@ export default function PostDetail() {
                     </div>
                     <p className="text-sm">{comment.content}</p>
                     <div className="flex items-center gap-4">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" className="h-8 rounded-full">
                         <Heart className="mr-1 h-3 w-3" />
                         {comment.likes}
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        className="h-8 rounded-full"
                         onClick={() => {
                           if (isReplyingTo === comment.id) {
                             setIsReplyingTo(null);
@@ -330,17 +353,17 @@ export default function PostDetail() {
                       </Button>
                     </div>
 
-                    {/* Reply Form */}
                     {isReplyingTo === comment.id && (
-                      <div className="mt-2 flex gap-2">
+                      <div className="mt-3 flex gap-2">
                         <Textarea
                           placeholder="Auf diesen Kommentar antworten..."
                           value={replyContent}
                           onChange={(e) => setReplyContent(e.target.value)}
-                          className="min-h-[44px] resize-none"
+                          className="min-h-[44px] resize-none rounded-full px-4 py-2"
                         />
                         <Button
                           size="icon"
+                          className="rounded-full h-10 w-10"
                           disabled={!replyContent.trim()}
                           onClick={() => handleSubmitReply(comment.id)}
                         >
@@ -349,9 +372,8 @@ export default function PostDetail() {
                       </div>
                     )}
 
-                    {/* Replies */}
                     {comment.replies.length > 0 && (
-                      <div className="mt-4 space-y-4 border-l pl-4">
+                      <div className="mt-4 space-y-4 rounded-lg bg-muted/30 p-3">
                         {comment.replies.map((reply) => (
                           <div key={reply.id} className="flex gap-3">
                             <Avatar className="h-8 w-8">
@@ -379,7 +401,7 @@ export default function PostDetail() {
                               </div>
                               <p className="text-sm">{reply.content}</p>
                               <div className="flex items-center gap-4">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" className="h-7 px-2 rounded-full">
                                   <Heart className="mr-1 h-3 w-3" />
                                   {reply.likes}
                                 </Button>
@@ -394,22 +416,33 @@ export default function PostDetail() {
               </div>
             ))
           ) : (
-            <p className="text-center text-muted-foreground">Noch keine Kommentare. Sei der Erste!</p>
+            <div className="rounded-xl border border-dashed p-8 text-center">
+              <MessageCircle className="mx-auto h-8 w-8 text-muted-foreground/70 mb-2" />
+              <p className="text-muted-foreground">Noch keine Kommentare. Sei der Erste!</p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Image Viewer Dialog */}
       <Dialog open={imageViewerOpen} onOpenChange={setImageViewerOpen}>
-        <DialogContent className="h-[90vh] max-w-full p-0">
+        <DialogContent className="h-[90vh] max-w-full p-0 border-none">
           <ScrollArea className="h-full">
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full bg-black/95">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute left-4 top-4 z-50 rounded-full bg-black/50 text-white"
+                onClick={() => setImageViewerOpen(false)}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <Image
                 src={post.images?.[selectedImageIndex] ?? "/placeholder.svg"}
                 alt={`Post image ${selectedImageIndex + 1}`}
-                className="h-auto w-full"
-                width={400}
-                height={400}
+                className="h-auto w-full object-contain"
+                width={1200}
+                height={1200}
+                priority
               />
             </div>
           </ScrollArea>

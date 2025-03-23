@@ -3,7 +3,6 @@ import "@/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
-import { TRPCReactProvider } from "@/trpc/react";
 import AppLayout from "./components/app-layout";
 
 export const metadata: Metadata = {
@@ -18,9 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>
-          <AppLayout>{children}</AppLayout>
-        </TRPCReactProvider>
+        <AppLayout>{children}</AppLayout>
       </body>
     </html>
   );

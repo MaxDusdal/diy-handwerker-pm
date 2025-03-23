@@ -37,20 +37,17 @@ export default function ExpertPage() {
   const [selectedSpecialtyLocal, setSelectedSpecialtyLocal] = useState<string | null>(null);
   const router = useRouter();
 
-  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
     setSearchQuery(value);
   };
 
-  // Handle specialty selection
   const handleSpecialtyChange = (value: string) => {
     setSelectedSpecialtyLocal(value);
     setSelectedSpecialty(value === "Alle" ? null : value);
   };
 
-  // Reset filters
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedSpecialtyLocal(null);
@@ -58,12 +55,9 @@ export default function ExpertPage() {
     setSelectedSpecialty(null);
   };
 
-  // Contact expert and navigate to chat
   const handleContactExpert = (expert: typeof experts[0]) => {
-    // First create or activate the expert chat thread
     startExpertChat(expert);
     
-    // Set a small timeout to ensure the thread is created and active before navigating
     setTimeout(() => {
       router.push("/chat");
     }, 50);
