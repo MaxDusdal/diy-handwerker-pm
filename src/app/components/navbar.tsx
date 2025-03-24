@@ -6,7 +6,7 @@ import ResetDataButton from "./reset-data-button";
 
 export default function Navbar() {
   return (
-    <header className="fixed left-0 right-0 top-0 z-10 h-16 border-b bg-background">
+    <header className="fixed left-0 right-0 top-0 z-[100] h-16 border-b bg-background">
       <div className="container flex h-full items-center justify-between px-4">
         <div></div>
 

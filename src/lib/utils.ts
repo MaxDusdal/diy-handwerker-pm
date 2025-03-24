@@ -8,21 +8,24 @@ export function cn(...inputs: ClassValue[]) {
 export function formatTimeAgo(date: Date) {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
   const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1,
+    Jahr: 31536000,
+    Monat: 2592000, 
+    Woche: 604800,
+    Tag: 86400,
+    Stunde: 3600,
+    Minute: 60,
+    Sekunde: 1,
   };
 
   let counter;
   for (const key in intervals) {
     counter = Math.floor(seconds / intervals[key as keyof typeof intervals]);
     if (counter > 0) {
-      return counter + " " + key + (counter > 1 ? "s" : "") + " ago";
+      if (key === "Monat" && counter > 1) {
+        return counter + " Monate" + " vorher";
+      }
+      return counter + " " + key + (counter > 1 ? "n" : "") + " her";
     }
   }
-  return "just now";
+  return "gerade eben";
 }

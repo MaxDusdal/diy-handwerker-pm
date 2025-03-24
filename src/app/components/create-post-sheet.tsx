@@ -1,51 +1,88 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Camera, Loader2, ArrowRight, CheckCircle, Send, MessageSquareHeart, CircleHelp, Star, MapPin, Clock, ArrowLeft } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { usePosts } from "@/lib/post-context"
-import { useExperts } from "@/lib/experts-context"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import ReactMarkdown from "react-markdown"
-import rehypeHighlight from "rehype-highlight"
-import rehypeSanitize from "rehype-sanitize"
-import remarkGfm from "remark-gfm"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
+import { useState } from "react";
+import {
+  Camera,
+  Loader2,
+  ArrowRight,
+  CheckCircle,
+  Send,
+  MessageSquareHeart,
+  CircleHelp,
+  Star,
+  MapPin,
+  Clock,
+  ArrowLeft,
+} from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { usePosts } from "@/lib/post-context";
+import { useExperts } from "@/lib/experts-context";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface CreatePostSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetProps) {
-  const router = useRouter()
-  const { addPost } = usePosts()
-  const { getExpertsByCategory, startExpertChat, experts } = useExperts()
-  const [step, setStep] = useState(1)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isLoadingAIResponse, setIsLoadingAIResponse] = useState(false)
-  const [postType, setPostType] = useState<"help" | "showcase">("help")
-  const [selectedImages, setSelectedImages] = useState<string[]>([])
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
-  const [category, setCategory] = useState("")
-  const [urgency, setUrgency] = useState<string | undefined>(undefined)
-  const [aiResponse, setAiResponse] = useState("")
-  const [availableExperts, setAvailableExperts] = useState<typeof experts>([])
+const selectedImages = [
+  "/images/real_placeholder_1.jpg?w=100&h=100",
+  "/images/real_placeholder_2.jpg?w=100&h=100",
+  "/images/real_placeholder_3.jpg?w=100&h=100",
+];
+
+export default function CreatePostSheet({
+  open,
+  onOpenChange,
+}: CreatePostSheetProps) {
+  const router = useRouter();
+  const { addPost } = usePosts();
+  const { getExpertsByCategory, startExpertChat, experts } = useExperts();
+  const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingAIResponse, setIsLoadingAIResponse] = useState(false);
+  const [postType, setPostType] = useState<"help" | "showcase">("help");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("");
+  const [urgency, setUrgency] = useState<string | undefined>(undefined);
+  const [aiResponse, setAiResponse] = useState("");
+  const [availableExperts, setAvailableExperts] = useState<typeof experts>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     addPost({
       type: postType,
@@ -60,37 +97,28 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
         expertise: "Member",
       },
       aiResponse: aiResponse.length > 0 ? aiResponse : undefined,
-    })
+    });
 
-    resetForm()
-    setIsSubmitting(false)
-    onOpenChange(false)
-  }
+    resetForm();
+    setIsSubmitting(false);
+    onOpenChange(false);
+  };
 
   const resetForm = () => {
-    setStep(1)
-    setTitle("")
-    setContent("")
-    setCategory("")
-    setUrgency(undefined)
-    setSelectedImages([])
-    setPostType("help")
-    setAiResponse("")
-    setAvailableExperts([])
-  }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files) {
-      const newImages = Array.from(files).map((file) => URL.createObjectURL(file))
-      setSelectedImages((prev) => [...prev, ...newImages])
-    }
-  }
+    setStep(1);
+    setTitle("");
+    setContent("");
+    setCategory("");
+    setUrgency(undefined);
+    setPostType("help");
+    setAiResponse("");
+    setAvailableExperts([]);
+  };
 
   const handleAskAI = async () => {
-    if (!title || !content) return
+    if (!title || !content) return;
 
-    setIsLoadingAIResponse(true)
+    setIsLoadingAIResponse(true);
 
     try {
       const response = await fetch("/api/chat", {
@@ -123,22 +151,22 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
-        
+
         if (done) break;
-        
+
         const text = decoder.decode(value);
         const lines = (partialChunk + text).split("\n\n");
         partialChunk = lines.pop() ?? "";
-        
+
         for (const line of lines) {
           const trimmedLine = line.trim();
           if (trimmedLine?.startsWith("data: ")) {
             const data = trimmedLine.slice(6);
-            
+
             if (data === "[DONE]") {
               continue;
             }
-            
+
             try {
               interface StreamResponse {
                 chunk?: string;
@@ -146,13 +174,13 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
                 error?: string;
                 details?: string;
               }
-              
+
               const parsedData = JSON.parse(data) as StreamResponse;
-              
+
               if (parsedData.error) {
                 throw new Error(parsedData.error);
               }
-              
+
               if (parsedData.fullText) {
                 fullText = parsedData.fullText;
                 setAiResponse(fullText);
@@ -170,51 +198,57 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
       setStep(2);
     } catch (error) {
       console.error("Error getting AI response:", error);
-      setAiResponse("Entschuldigung, ich konnte Ihre Anfrage nicht verarbeiten. Bitte versuchen Sie, Ihre Frage an die Community zu stellen.");
+      setAiResponse(
+        "Entschuldigung, ich konnte Ihre Anfrage nicht verarbeiten. Bitte versuchen Sie, Ihre Frage an die Community zu stellen.",
+      );
     } finally {
       setIsLoadingAIResponse(false);
     }
   };
 
   const handleProblemSolved = () => {
-    resetForm()
-    onOpenChange(false)
-  }
+    resetForm();
+    onOpenChange(false);
+  };
 
   const handleContactExpert = () => {
-    const categoryExperts = getExpertsByCategory(category)
-    
-    let expertsToShow = [...categoryExperts]
-    
-    if (expertsToShow.length < 3) {
-      const defaultExperts = getExpertsByCategory("Reparaturen")
-        .filter(expert => !expertsToShow.some(e => e.id === expert.id))
-      
-      expertsToShow = [...expertsToShow, ...defaultExperts.slice(0, 3 - expertsToShow.length)]
-    }
-    
-    setAvailableExperts(expertsToShow)
-    setStep(4) 
-  }
+    const categoryExperts = getExpertsByCategory(category);
 
-  const handleSelectExpert = (expert: typeof experts[0]) => {
-    startExpertChat(expert)
-    
-    resetForm()
-    onOpenChange(false)
-    
+    let expertsToShow = [...categoryExperts];
+
+    if (expertsToShow.length < 3) {
+      const defaultExperts = getExpertsByCategory("Reparaturen").filter(
+        (expert) => !expertsToShow.some((e) => e.id === expert.id),
+      );
+
+      expertsToShow = [
+        ...expertsToShow,
+        ...defaultExperts.slice(0, 3 - expertsToShow.length),
+      ];
+    }
+
+    setAvailableExperts(expertsToShow);
+    setStep(4);
+  };
+
+  const handleSelectExpert = (expert: (typeof experts)[0]) => {
+    startExpertChat(expert);
+
+    resetForm();
+    onOpenChange(false);
+
     setTimeout(() => {
-      router.push("/chat")
-    }, 50)
-  }
+      router.push("/chat");
+    }, 50);
+  };
 
   const handleBackToAiResponse = () => {
-    setStep(2)
-  }
+    setStep(2);
+  };
 
   const handleContinueToPost = () => {
-    setStep(3)
-  }
+    setStep(3);
+  };
 
   const renderStep1 = () => (
     <div className="space-y-6">
@@ -231,10 +265,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
       <div className="space-y-2">
         <Label htmlFor="category">Kategorie</Label>
-        <Select 
-          value={category}
-          onValueChange={setCategory}
-        >
+        <Select value={category} onValueChange={setCategory}>
           <SelectTrigger>
             <SelectValue placeholder="Kategorie auswählen" />
           </SelectTrigger>
@@ -252,10 +283,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
       <div className="space-y-2">
         <Label htmlFor="urgency">Dringlichkeit</Label>
-        <Select
-          value={urgency}
-          onValueChange={setUrgency}
-        >
+        <Select value={urgency} onValueChange={setUrgency}>
           <SelectTrigger>
             <SelectValue placeholder="Dringlichkeit auswählen" />
           </SelectTrigger>
@@ -287,7 +315,9 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
               <Image
                 src={image ?? "/placeholder.svg"}
                 alt={`Vorschau ${index + 1}`}
-                className="w-full h-full object-cover rounded-md"
+                width={100}
+                height={100}
+                className="h-full w-full rounded-md object-cover"
               />
             </div>
           ))}
@@ -307,13 +337,12 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
           accept="image/*"
           multiple
           className="hidden"
-          onChange={handleImageUpload}
         />
       </div>
 
-      <Button 
-        type="button" 
-        className="w-full" 
+      <Button
+        type="button"
+        className="w-full"
         disabled={isLoadingAIResponse || !title || !content}
         onClick={handleAskAI}
       >
@@ -341,7 +370,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="markdown-content prose prose-sm dark:prose-invert max-w-none">
+          <div className="markdown-content prose prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown
               rehypePlugins={[rehypeHighlight, rehypeSanitize]}
               remarkPlugins={[remarkGfm]}
@@ -353,17 +382,28 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
       </Card>
 
       <div className="grid grid-cols-1 gap-4">
-        <Button onClick={handleProblemSolved} variant="outline" className="flex items-center justify-center">
+        <Button
+          onClick={handleProblemSolved}
+          variant="outline"
+          className="flex items-center justify-center"
+        >
           <CheckCircle className="mr-2 h-4 w-4" />
           Problem gelöst!
         </Button>
-        
-        <Button onClick={handleContactExpert} variant="outline" className="flex items-center justify-center">
+
+        <Button
+          onClick={handleContactExpert}
+          variant="outline"
+          className="flex items-center justify-center"
+        >
           <MessageSquareHeart className="mr-2 h-4 w-4" />
           Experten kontaktieren
         </Button>
-        
-        <Button onClick={handleContinueToPost} className="flex items-center justify-center">
+
+        <Button
+          onClick={handleContinueToPost}
+          className="flex items-center justify-center"
+        >
           <CircleHelp className="mr-2 h-4 w-4" />
           Frage an Community stellen
         </Button>
@@ -397,16 +437,18 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
       <div className="space-y-2">
         <Label>KI-Vorschlag (wird im Beitrag enthalten sein)</Label>
-        <div className="rounded-md border p-4 max-h-[150px] overflow-y-auto">
+        <div className="max-h-[150px] overflow-y-auto rounded-md border p-4">
           <div className="prose prose-sm">
-            <ReactMarkdown>
-              {aiResponse}
-            </ReactMarkdown>
+            <ReactMarkdown>{aiResponse}</ReactMarkdown>
           </div>
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting || !title}>
+      <Button
+        type="submit"
+        className="w-full"
+        disabled={isSubmitting || !title}
+      >
         {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -424,8 +466,13 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
   const renderStep4 = () => (
     <div className="space-y-6">
-      <div className="flex items-center mb-4">
-        <Button variant="ghost" size="icon" onClick={handleBackToAiResponse} className="mr-2">
+      <div className="mb-4 flex items-center">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleBackToAiResponse}
+          className="mr-2"
+        >
           <ArrowLeft className="h-4 w-4" />
           <span className="sr-only">Zurück</span>
         </Button>
@@ -444,7 +491,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
                 <div className="flex-1">
                   <h3 className="font-semibold">{expert.name}</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-sm text-muted-foreground">
                     {expert.specialty}
                   </p>
                 </div>
@@ -452,7 +499,7 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   <span className="font-medium">{expert.rating}</span>
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-sm text-muted-foreground">
                     ({expert.ratingCount})
                   </span>
                 </div>
@@ -468,17 +515,17 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
-                  <MapPin className="text-muted-foreground h-3.5 w-3.5" />
+                  <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>{expert.hourlyRate}€/h</span>
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <Clock className="text-muted-foreground h-3.5 w-3.5" />
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>{expert.availability}</span>
                 </div>
               </div>
 
-              <Button 
+              <Button
                 className="w-full"
                 onClick={() => handleSelectExpert(expert)}
               >
@@ -500,7 +547,10 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90%] sm:h-[90%] overflow-y-auto">
+      <SheetContent
+        side="bottom"
+        className="h-[90%] overflow-y-auto sm:h-[90%]"
+      >
         <SheetHeader>
           <SheetTitle>
             {step === 1 && "Problem beschreiben"}
@@ -518,6 +568,5 @@ export default function CreatePostSheet({ open, onOpenChange }: CreatePostSheetP
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
-

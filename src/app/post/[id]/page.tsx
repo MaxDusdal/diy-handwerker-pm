@@ -68,7 +68,7 @@ export default function PostDetail() {
     if (!post || !newComment.trim()) return;
 
     setIsSubmitting(true);
-    
+
     addComment(post.id, {
       content: newComment,
       author: {
@@ -84,7 +84,7 @@ export default function PostDetail() {
 
   const handleSubmitReply = async (commentId: number) => {
     if (!post || !replyContent.trim()) return;
-    
+
     addComment(post.id, {
       content: replyContent,
       author: {
@@ -93,7 +93,7 @@ export default function PostDetail() {
         expertise: "Member",
       },
     });
-    
+
     setReplyContent("");
     setIsReplyingTo(null);
   };
@@ -116,8 +116,8 @@ export default function PostDetail() {
   const hasImage = post.images && post.images.length > 0;
 
   return (
-    <div className="min-h-screen pb-16 bg-background">
-      <div className="sticky top-0 z-20 backdrop-blur-md bg-background/80 border-b">
+    <div className="min-h-screen bg-background pb-16">
+      <div className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur-md">
         <div className="flex items-center justify-between p-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-6 w-6" />
@@ -157,11 +157,11 @@ export default function PostDetail() {
           ) : (
             <div className="h-full w-full bg-gradient-to-b from-primary/20 to-background" />
           )}
-          
+
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
+        <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-background">
@@ -179,7 +179,9 @@ export default function PostDetail() {
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{post.title}</h1>
+              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">
+                {post.title}
+              </h1>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -203,29 +205,31 @@ export default function PostDetail() {
         </div>
 
         {post.aiResponse && (
-          <div className="rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/30 p-4 my-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
+          <div className="my-4 rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm dark:border-blue-900/50 dark:bg-blue-950/30">
+            <div className="mb-2 flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
                 <MessageCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="font-medium text-blue-600 dark:text-blue-400">KI-Vorschlag</h3>
+              <h3 className="font-medium text-blue-600 dark:text-blue-400">
+                KI-Vorschlag
+              </h3>
             </div>
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div className="prose prose-sm max-w-none dark:prose-invert">
               <ReactMarkdown
                 rehypePlugins={[rehypeHighlight, rehypeSanitize]}
                 remarkPlugins={[remarkGfm]}
               >
-                {isAiResponseExpanded 
-                  ? aiResponseText 
+                {isAiResponseExpanded
+                  ? aiResponseText
                   : truncateText(aiResponseText, 300)}
               </ReactMarkdown>
-              
+
               {showExpandButton && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setIsAiResponseExpanded(!isAiResponseExpanded)}
-                  className="mt-2 text-blue-600 dark:text-blue-400 flex items-center gap-1"
+                  className="mt-2 flex items-center gap-1 text-blue-600 dark:text-blue-400"
                 >
                   {isAiResponseExpanded ? (
                     <>
@@ -243,7 +247,7 @@ export default function PostDetail() {
         )}
 
         {post.images && post.images.length > 1 && (
-          <div className="grid grid-cols-2 gap-2 my-4">
+          <div className="my-4 grid grid-cols-2 gap-2">
             {post.images.slice(1).map((image, index) => (
               <div
                 key={index + 1}
@@ -265,9 +269,9 @@ export default function PostDetail() {
           </div>
         )}
 
-        <div className="flex items-center justify-between border-y py-3 my-2">
-          <Button 
-            variant="ghost" 
+        <div className="my-2 flex items-center justify-between border-y py-3">
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => toggleLike(post.id)}
             className="rounded-full"
@@ -285,7 +289,7 @@ export default function PostDetail() {
           </Button>
         </div>
 
-        <form onSubmit={handleSubmitComment} className="flex gap-2 my-4">
+        <form onSubmit={handleSubmitComment} className="my-4 flex gap-2">
           <Textarea
             placeholder="Kommentar hinzufügen..."
             value={newComment}
@@ -296,33 +300,36 @@ export default function PostDetail() {
             type="submit"
             size="icon"
             disabled={!newComment.trim() || isSubmitting}
-            className="rounded-full h-12 w-12 flex-shrink-0"
+            className="h-12 w-12 flex-shrink-0 rounded-full"
           >
             <Send className="h-5 w-5" />
           </Button>
         </form>
 
         <div className="space-y-6 py-2">
-          <h3 className="font-semibold text-lg">Kommentare</h3>
-          
+          <h3 className="text-lg font-semibold">Kommentare</h3>
+
           {post.commentsList && post.commentsList.length > 0 ? (
             post.commentsList.map((comment) => (
-              <div key={comment.id} className="space-y-4 rounded-xl border border-border/40 p-4">
-                <div className="flex gap-3">
-                  <Avatar>
+              <div
+                key={comment.id}
+                className="space-y-4 rounded-xl border border-border/40 p-4"
+              >
+                <div className="flex gap-2">
+                  <Avatar className="h-5 w-5">
                     <AvatarImage
                       src={comment.author.avatar}
                       alt={comment.author.name}
                     />
                     <AvatarFallback>{comment.author.name[0]}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="font-semibold">
-                          {comment.author.name}
+                        <span className="text-sm font-semibold">
+                          {comment.author.name.split(" ")[0]}
                         </span>
-                        <span className="ml-2 text-xs text-muted-foreground">
+                        <span className="text-xs ml-3 text-muted-foreground">
                           {comment.author.expertise}
                         </span>
                       </div>
@@ -332,12 +339,16 @@ export default function PostDetail() {
                     </div>
                     <p className="text-sm">{comment.content}</p>
                     <div className="flex items-center gap-4">
-                      <Button variant="ghost" size="sm" className="h-8 rounded-full">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 rounded-full"
+                      >
                         <Heart className="mr-1 h-3 w-3" />
                         {comment.likes}
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         className="h-8 rounded-full"
                         onClick={() => {
@@ -363,7 +374,7 @@ export default function PostDetail() {
                         />
                         <Button
                           size="icon"
-                          className="rounded-full h-10 w-10"
+                          className="h-10 w-10 rounded-full"
                           disabled={!replyContent.trim()}
                           onClick={() => handleSubmitReply(comment.id)}
                         >
@@ -376,7 +387,7 @@ export default function PostDetail() {
                       <div className="mt-4 space-y-4 rounded-lg bg-muted/30 p-3">
                         {comment.replies.map((reply) => (
                           <div key={reply.id} className="flex gap-3">
-                            <Avatar className="h-8 w-8">
+                            <Avatar className="h-5 w-5">
                               <AvatarImage
                                 src={reply.author.avatar}
                                 alt={reply.author.name}
@@ -388,8 +399,8 @@ export default function PostDetail() {
                             <div className="flex-1 space-y-1">
                               <div className="flex items-start justify-between">
                                 <div>
-                                  <span className="font-semibold">
-                                    {reply.author.name}
+                                  <span className="text-sm font-semibold">
+                                    {reply.author.name.split(" ")[0]}
                                   </span>
                                   <span className="ml-2 text-xs text-muted-foreground">
                                     {reply.author.expertise}
@@ -401,7 +412,11 @@ export default function PostDetail() {
                               </div>
                               <p className="text-sm">{reply.content}</p>
                               <div className="flex items-center gap-4">
-                                <Button variant="ghost" size="sm" className="h-7 px-2 rounded-full">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 rounded-full px-2"
+                                >
                                   <Heart className="mr-1 h-3 w-3" />
                                   {reply.likes}
                                 </Button>
@@ -417,20 +432,22 @@ export default function PostDetail() {
             ))
           ) : (
             <div className="rounded-xl border border-dashed p-8 text-center">
-              <MessageCircle className="mx-auto h-8 w-8 text-muted-foreground/70 mb-2" />
-              <p className="text-muted-foreground">Noch keine Kommentare. Sei der Erste!</p>
+              <MessageCircle className="mx-auto mb-2 h-8 w-8 text-muted-foreground/70" />
+              <p className="text-muted-foreground">
+                Noch keine Kommentare. Sei der Erste!
+              </p>
             </div>
           )}
         </div>
       </div>
 
       <Dialog open={imageViewerOpen} onOpenChange={setImageViewerOpen}>
-        <DialogContent className="h-[90vh] max-w-full p-0 border-none">
+        <DialogContent className="h-[90vh] max-w-full border-none p-0">
           <ScrollArea className="h-full">
             <div className="relative h-full w-full bg-black/95">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="absolute left-4 top-4 z-50 rounded-full bg-black/50 text-white"
                 onClick={() => setImageViewerOpen(false)}
               >

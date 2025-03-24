@@ -147,9 +147,9 @@ export default function Home() {
 
       <Button
         onClick={() => setIsCreatePostOpen(true)}
-        className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg bg-white"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-6 w-6 text-black" />
         <span className="sr-only">Beitrag erstellen</span>
       </Button>
 
